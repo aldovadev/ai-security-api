@@ -10,7 +10,7 @@ ENV APP_PORT = 8080
 ENV DB_NAME = demoasadb
 ENV DB_USER = asaserver
 ENV DB_PASS = ukpjjpusat09
-ENV DB_HOST = 10.68.176.3
+ENV DB_HOST = 35.226.147.202
 
 COPY ./ ./
 
