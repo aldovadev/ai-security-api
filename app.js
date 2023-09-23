@@ -3,10 +3,21 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import cors from "cors";
 import db from "./src/config/database.js";
+
 dotenv.config();
 
 const app = express();
 app.use(helmet());
+
+(async () => {
+  try {
+    await db.sync();
+    await db.authenticate();
+    console.log("Database connection has been established successfully.");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
+  }
+})();
 
 app.use(
   cors({
