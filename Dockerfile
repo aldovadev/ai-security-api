@@ -1,5 +1,5 @@
 #BUILD STAGE USING NODE
-FROM node:18.18:alpine
+FROM node:alpine
 WORKDIR /
 COPY package*.json ./
 
