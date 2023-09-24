@@ -11,6 +11,7 @@ ENV DB_NAME = demoasadb
 ENV DB_USER = asaserver
 ENV DB_PASS = ukpjjpusat09
 ENV DB_HOST = 35.226.147.202
+ENV INSTANCE_NAME = ai-security-application:us-central1:asadb
 
 COPY ./ ./
 
