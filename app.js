@@ -28,7 +28,7 @@ app.use(
 
 app.use(express.json());
 
-const PORT = process.env.APP_PORT || 8080;
+const PORT = process.env.APP_PORT || 3000;
 
 app.get("/", async (req, res) => {
   res.json({ status: "Server ASA is running!" });

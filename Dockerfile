@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN npm install
 RUN npm install pg
 
-ENV APP_PORT = 8080
+ENV APP_PORT = 3000
 ENV DB_NAME = demoasadb
 ENV DB_USER = asaserver
 ENV DB_PASS = ukpjjpusat09
@@ -15,7 +15,7 @@ ENV INSTANCE_NAME = ai-security-application:us-central1:asadb
 
 COPY ./ ./
 
-EXPOSE 8080
+EXPOSE 3000
 
 #RUN APP STAGE USING NODE
 CMD ["npm", "start"]
