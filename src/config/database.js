@@ -8,7 +8,7 @@ const db = new Sequelize(
   process.env.DB_PASS,
   {
     dialect: "postgres",
-    host: `/cloudsql/${process.env.INSTANCE_NAME}`,
+    host: process.env.DB_HOST,
     pool: {
       max: 5,
       min: 0,
