@@ -7,7 +7,7 @@
     "start": "node app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "aldovadev",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
