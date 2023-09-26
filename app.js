@@ -34,6 +34,26 @@ app.get("/", async (req, res) => {
   res.json({ status: "Server ASA is running!" });
 });
 
+app.get("/db-status", async (req, res) => {
+  (async () => {
+    try {
+      await db.sync();
+      await db.authenticate();
+      res.json({
+        status: "Database connection has been established successfully.",
+      });
+      console.log(
+        "status: Database connection has been established successfully."
+      );
+    } catch (error) {
+      res.json({
+        error: error,
+      });
+      console.error("error:", error);
+    }
+  })();
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
