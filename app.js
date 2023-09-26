@@ -33,7 +33,7 @@ const PORT = process.env.APP_PORT || 8080;
 app.get("/", async (req, res) => {
   res.json({
     status: "Server ASA is running!",
-    APP_PORT: process.env.APP_PORT,
+    port: process.env.APP_PORT,
   });
 });
 
@@ -45,9 +45,9 @@ app.get("/db-status", async (req, res) => {
       res.json({
         status: "Database connection has been established successfully.",
         data: {
-          APP_PORT: process.env.APP_PORT,
-          DB_NAME: process.env.DB_NAME,
-          DB_HOST: process.env.DB_HOST,
+          port: process.env.APP_PORT,
+          dbname: process.env.DB_NAME,
+          dbhost: process.env.DB_HOST,
         },
       });
       console.log(
@@ -57,9 +57,9 @@ app.get("/db-status", async (req, res) => {
       res.json({
         error: error,
         data: {
-          APP_PORT: process.env.APP_PORT,
-          DB_NAME: process.env.DB_NAME,
-          DB_HOST: process.env.DB_HOST,
+          port: process.env.APP_PORT,
+          dbname: process.env.DB_NAME,
+          dbhost: process.env.DB_HOST,
         },
       });
       console.error("error:", error);
