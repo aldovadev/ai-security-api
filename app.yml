@@ -5,6 +5,3 @@ env_variables:
   DB_USER : asaserver
   DB_PASS : ukpjjpusat09
   DB_HOST : 35.226.147.202
-  INSTANCE_NAME : ai-security-application:us-central1:asadb
-beta_settings:
-  cloud_sql_instances: ai-security-application:us-central1:asadb

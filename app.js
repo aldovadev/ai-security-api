@@ -48,6 +48,11 @@ app.get("/db-status", async (req, res) => {
     } catch (error) {
       res.json({
         error: error,
+        data: {
+          APP_PORT: process.env.APP_PORT,
+          DB_NAME: process.env.DB_NAME,
+          DB_HOST: process.env.DB_HOST,
+        },
       });
       console.error("error:", error);
     }
