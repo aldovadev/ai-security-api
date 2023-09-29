@@ -5,12 +5,6 @@ COPY package*.json ./
 
 RUN npm install
 
-ENV APP_PORT 8080
-ENV DB_NAME demoasadb
-ENV DB_USER asaserver
-ENV DB_PASS ukpjjpusat09
-ENV DB_HOST 34.101.246.0
-
 COPY ./ ./
 
 EXPOSE ${APP_PORT}
