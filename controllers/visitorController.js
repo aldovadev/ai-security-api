@@ -9,11 +9,17 @@ const getVisitor = async (req, res) => {
   const param = req.params.status;
 
   try {
-    const visitorData = await visitorModel.findAll({
-      where: {
-        visit_status: param,
-      },
-    });
+    let visitorData;
+
+    if (param === "All") {
+      visitorData = await visitorModel.findAll();
+    } else {
+      visitorData = await visitorModel.findAll({
+        where: {
+          visit_status: param,
+        },
+      });
+    }
     res.status(200).send({
       data: visitorData,
     });

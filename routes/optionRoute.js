@@ -1,9 +1,15 @@
 import Router from "express";
-import { getService, getVisitStatus } from "../controllers/optionController.js";
+import {
+  getService,
+  getRole,
+  getVisitStatus,
+} from "../controllers/optionController.js";
 
 const router = Router();
 
 router.get("/service", getService);
+
+router.get("/role", getRole);
 
 router.get("/visitStatus", getVisitStatus);
 
