@@ -9,6 +9,7 @@ const db = new Sequelize(
   {
     dialect: "postgres",
     host: process.env.DB_HOST,
+    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
     pool: {
       max: 5,
       min: 0,
