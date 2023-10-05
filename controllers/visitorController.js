@@ -6,20 +6,27 @@ import visitorSchema from "../schemas/visitorSchema.js";
 import { InternalErrorHandler } from "../utils/errorHandler.js";
 
 const getVisitor = async (req, res) => {
-  const param = req.params.status;
+  const visit_status = req.params.status;
+  const company = req.company_name;
 
   try {
     let visitorData;
 
-    if (param === "All") {
-      visitorData = await visitorModel.findAll();
-    } else {
+    if (visit_status === "All")
       visitorData = await visitorModel.findAll({
         where: {
-          visit_status: param,
+          company_destination: company,
+        },
+      });
+    else {
+      visitorData = await visitorModel.findAll({
+        where: {
+          company_destination: company,
+          visit_status: visit_status,
         },
       });
     }
+
     res.status(200).send({
       data: visitorData,
     });
@@ -30,9 +37,8 @@ const getVisitor = async (req, res) => {
 
 const createVisitor = async (req, res) => {
   const { error } = visitorSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
-  }
+
+  if (error) return res.status(400).send({ error: error.details[0].message });
 
   const {
     name,
@@ -88,12 +94,9 @@ const createVisitor = async (req, res) => {
     await t.commit();
     res
       .status(200)
-      .send({ message: "Employee created successfully", data: newVisitor });
+      .send({ message: "Visitor created successfully", data: newVisitor });
   } catch (error) {
-    if (t) {
-      t.rollback();
-    }
-
+    if (t) t.rollback();
     res.status(500).send({ error: InternalErrorHandler(error) });
   }
 };
@@ -106,10 +109,38 @@ const deleteVisitor = (req, res) => {
   res.send({ message: "Delete Visitor Endpoint" });
 };
 
-export { getVisitor, createVisitor, editVisitor, deleteVisitor };
+const getVisitorProfile = async (req, res) => {
+  const company = req.company_name;
+  const id = req.params.id;
+
+  try {
+    const visitorProfile = await visitorModel.findOne({
+      where: {
+        company_destination: company,
+        id: id,
+      },
+    });
+
+    res.status(200).send({
+      data: visitorProfile,
+    });
+  } catch (error) {
+    res.status(500).send({
+      error: InternalErrorHandler(error),
+    });
+  }
+};
+
+export {
+  getVisitor,
+  createVisitor,
+  editVisitor,
+  deleteVisitor,
+  getVisitorProfile,
+};
 
 async function generateVisitNumber() {
-  var recentDate = new Date();
+  const recentDate = new Date();
 
   const lastVisitNumber = await visitorModel.findOne({
     order: [["created_at", "DESC"]],
@@ -123,13 +154,13 @@ async function generateVisitNumber() {
       .toString(36)
       .toUpperCase();
 
-    let firstSixDigits = lastVisitNumber.visit_number.substring(0, 6);
+    const firstSixDigits = lastVisitNumber.visit_number.substring(0, 6);
+
     if (
       incrementedSeq > "ZZ" ||
       firstSixDigits !== moment(recentDate).format("YYMMDD")
-    ) {
+    )
       incrementedSeq = "00";
-    }
   }
 
   incrementedSeq = incrementedSeq.padStart(2, "0");

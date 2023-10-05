@@ -4,15 +4,19 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import corsOptions from "./config/corsOptions.js";
+import credentials from "./config/credentials.js";
 import db from "./config/database.js";
+import cookieParser from "cookie-parser";
+import logger from "./utils/requestLogger.js";
 
 //Import Routes
 import userRoute from "./routes/userRoute.js";
 import visitorRoute from "./routes/visitorRoute.js";
 import employeeRoute from "./routes/employeeRoute.js";
 import optionRoute from "./routes/optionRoute.js";
+import authRoute from "./routes/authRoute.js";
 
-// Import table when create new table to sync
+// Uncomment import table when create new table to sync
 // import roleModel from "./models/roleModel.js";
 // import serviceModel from "./models/serviceModel.js";
 // import visitorModel from "./models/visitorModel.js";
@@ -25,15 +29,18 @@ dotenv.config();
 
 // Define app Express and module usage
 const app = express();
+app.use(logger);
+app.use(credentials);
 app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(cookieParser());
 
 // Sync database and check connetion
 (async () => {
-  await db.sync({});
+  // await db.sync({ alter: true });
   try {
     await db.authenticate();
     console.log("Database connection has been established successfully.");
@@ -47,6 +54,7 @@ app.use(userRoute);
 app.use(visitorRoute);
 app.use(employeeRoute);
 app.use(optionRoute);
+app.use(authRoute);
 
 // Default get endpoint route
 app.get("/", async (req, res) => {

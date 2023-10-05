@@ -9,7 +9,7 @@ const userModel = db.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
+    company_name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -35,13 +35,17 @@ const userModel = db.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    role_id: {
-      type: DataTypes.INTEGER,
+    user_role: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     status: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    refresh_token: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {

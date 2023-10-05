@@ -3,7 +3,7 @@ import db from "../config/database.js";
 import userModel from "../models/userModel.js";
 import userSchema from "../schemas/userSchema.js";
 import { InternalErrorHandler } from "../utils/errorHandler.js";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcrypt";
 
 const getUser = async (req, res) => {
   try {
@@ -16,19 +16,21 @@ const getUser = async (req, res) => {
 
 const createUser = async (req, res) => {
   const { error } = userSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
-  }
+
+  if (error) return res.status(400).send({ error: error.details[0].message });
+
   const {
-    name,
+    company_name,
     email,
     password,
     phone_number,
     address,
     service_id,
     status,
-    role_id,
+    user_role,
   } = req.body;
+
+  const hashPassword = await bcrypt.hash(password, 10);
 
   const t = await db.transaction({
     isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
@@ -37,14 +39,14 @@ const createUser = async (req, res) => {
   try {
     const newUser = await userModel.create(
       {
-        name: name,
+        company_name: company_name,
         email: email,
-        password: password,
+        password: hashPassword,
         phone_number: phone_number,
         address: address,
         service_id: service_id,
         status: status,
-        role_id: role_id,
+        user_role: user_role,
       },
       { transaction: t }
     );
@@ -54,9 +56,8 @@ const createUser = async (req, res) => {
       .status(200)
       .send({ message: "User created successfully", data: newUser });
   } catch (error) {
-    if (t) {
-      t.rollback();
-    }
+    if (t) t.rollback();
+
     res.status(500).send({ error: InternalErrorHandler(error) });
   }
 };
@@ -69,12 +70,19 @@ const deleteUser = (req, res) => {
   res.send({ message: "Delete User Endpoint" });
 };
 
-const loginUser = (req, res) => {
-  res.send({ message: "Login User Endpoint" });
+const getUserProfile = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const userProfile = await userModel.findOne({
+      where: {
+        id: id,
+      },
+    });
+    res.status(200).send({ data: userProfile });
+  } catch (error) {
+    res.status(500).send({ error: InternalErrorHandler(error) });
+  }
 };
 
-const logoutUser = (req, res) => {
-  res.send({ message: "Logout User Endpoint" });
-};
-
-export { getUser, createUser, editUser, deleteUser, loginUser, logoutUser };
+export { getUser, createUser, editUser, deleteUser, getUserProfile };

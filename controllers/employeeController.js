@@ -5,8 +5,14 @@ import employeeSchema from "../schemas/employeeSchema.js";
 import { InternalErrorHandler } from "../utils/errorHandler.js";
 
 const getEmployee = async (req, res) => {
+  const company = req.company_name;
+
   try {
-    const employeeData = await employeeModel.findAll();
+    const employeeData = await employeeModel.findAll({
+      where: {
+        company: company,
+      },
+    });
     res.status(200).send({ data: employeeData });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });
@@ -15,9 +21,12 @@ const getEmployee = async (req, res) => {
 
 const createEmployee = async (req, res) => {
   const { error } = employeeSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
-  }
+  if (error) return res.status(400).send({ error: error.details[0].message });
+
+  const company = req.company_name;
+
+  console.log(company);
+
   const { name, email, phone_number, gender, employee_id, position, address } =
     req.body;
 
@@ -30,6 +39,7 @@ const createEmployee = async (req, res) => {
       {
         name: name,
         email: email,
+        company: company,
         phone_number: phone_number,
         gender: gender,
         employee_id: employee_id,
@@ -61,4 +71,27 @@ const deleteEmployee = (req, res) => {
   res.send({ message: "Delete Employee Endpoint" });
 };
 
-export { getEmployee, createEmployee, editEmployee, deleteEmployee };
+const getEmployeeProfile = async (req, res) => {
+  const id = req.params.id;
+  const company = req.company_name;
+
+  try {
+    const employeeProfile = await employeeModel.findOne({
+      where: {
+        id: id,
+        company: company,
+      },
+    });
+    res.status(200).send({ data: employeeProfile });
+  } catch (error) {
+    res.status(500).send({ error: InternalErrorHandler(error) });
+  }
+};
+
+export {
+  getEmployee,
+  createEmployee,
+  editEmployee,
+  deleteEmployee,
+  getEmployeeProfile,
+};
