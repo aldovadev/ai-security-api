@@ -26,7 +26,7 @@ const logEvents = async (message, logName) => {
   }
 };
 
-const logger = (req, res, next) => {
+const requestLogger = (req, res, next) => {
   logEvents(
     `${req.method}\t${req.headers.origin}\t${req.url}`,
     "requestLog.txt"
@@ -34,4 +34,10 @@ const logger = (req, res, next) => {
   next();
 };
 
-export default logger;
+const errorLogger = (err, req, res, next) => {
+  logEvents(`${err.name}: ${err.message}`, "errorLog.txt");
+  console.error(err.stack);
+  res.status(500).send(err.message);
+};
+
+export { requestLogger, errorLogger };

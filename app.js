@@ -7,7 +7,7 @@ import corsOptions from "./config/corsOptions.js";
 import credentials from "./config/credentials.js";
 import db from "./config/database.js";
 import cookieParser from "cookie-parser";
-import logger from "./utils/requestLogger.js";
+import { requestLogger, errorLogger } from "./utils/eventLogger.js";
 
 //Import Routes
 import userRoute from "./routes/userRoute.js";
@@ -29,7 +29,7 @@ dotenv.config();
 
 // Define app Express and module usage
 const app = express();
-app.use(logger);
+app.use(requestLogger);
 app.use(credentials);
 app.use(helmet());
 app.use(cors(corsOptions));
@@ -65,6 +65,9 @@ app.get("/", async (req, res) => {
 
 // Get data APP_PORT from .env
 const PORT = process.env.APP_PORT || 8080;
+
+//Log internal error
+app.use(errorLogger);
 
 // Listening to PORT
 app.listen(PORT, () => {
