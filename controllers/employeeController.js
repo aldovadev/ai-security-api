@@ -13,7 +13,11 @@ const getEmployee = async (req, res) => {
         company: company,
       },
     });
-    res.status(200).send({ data: employeeData });
+    res.status(200).send({
+      message: "Get employee data success",
+      company: company,
+      data: employeeData,
+    });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });
   }
@@ -51,9 +55,11 @@ const createEmployee = async (req, res) => {
     );
 
     await t.commit();
-    res
-      .status(200)
-      .send({ message: "Employee created successfully", newEmployee });
+    res.status(200).send({
+      message: "Employee created successfully",
+      company: company,
+      data: newEmployee,
+    });
   } catch (error) {
     if (t) {
       t.rollback();
@@ -82,7 +88,11 @@ const getEmployeeProfile = async (req, res) => {
         company: company,
       },
     });
-    res.status(200).send({ data: employeeProfile });
+    res.status(200).send({
+      message: "Get employee profile success",
+      company: company,
+      data: employeeProfile,
+    });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });
   }

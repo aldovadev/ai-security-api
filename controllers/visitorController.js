@@ -28,6 +28,8 @@ const getVisitor = async (req, res) => {
     }
 
     res.status(200).send({
+      message: "Get visitor success",
+      company: company,
       data: visitorData,
     });
   } catch (error) {
@@ -122,6 +124,7 @@ const getVisitorProfile = async (req, res) => {
     });
 
     res.status(200).send({
+      message: "Get visitor profile seccess",
       data: visitorProfile,
     });
   } catch (error) {

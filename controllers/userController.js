@@ -8,7 +8,7 @@ import bcrypt from "bcrypt";
 const getUser = async (req, res) => {
   try {
     const userData = await userModel.findAll();
-    res.status(200).send({ data: userData });
+    res.status(200).send({ message: "Get user success", data: userData });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });
   }
@@ -79,7 +79,9 @@ const getUserProfile = async (req, res) => {
         id: id,
       },
     });
-    res.status(200).send({ data: userProfile });
+    res
+      .status(200)
+      .send({ message: "Get user profile success", data: userProfile });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });
   }

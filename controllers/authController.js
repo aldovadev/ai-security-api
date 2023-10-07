@@ -71,7 +71,9 @@ const handleLogin = async (req, res) => {
         secure: true,
         maxAge: 24 * 60 * 60 * 1000,
       });
-      res.status(200).send({ accesToken: accesToken });
+      res
+        .status(200)
+        .send({ message: "Logout success", accesToken: accesToken });
     } else {
     }
   } catch (error) {
@@ -116,7 +118,7 @@ const handleLogout = async (req, res) => {
       sameSite: "None",
       secure: true,
     });
-    res.status(200).send({ message: "Logout success" });
+    res.status(200).send({ message: "Logout success", accesToken: null });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });
   }
@@ -160,7 +162,9 @@ const handleRefreshToken = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "15m" }
     );
-    res.status(200).send({ accessToken: accessToken });
+    res
+      .status(200)
+      .send({ message: "Refresh token success", accessToken: accessToken });
   });
 };
 
