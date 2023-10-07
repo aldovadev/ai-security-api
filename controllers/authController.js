@@ -28,8 +28,6 @@ const handleLogin = async (req, res) => {
       ],
     });
 
-    console.log(userData);
-
     if (!userData)
       return res.status(404).send({ message: `${email} not found!` });
 
@@ -45,7 +43,7 @@ const handleLogin = async (req, res) => {
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "30m" }
       );
 
       const refreshToken = jwt.sign(
