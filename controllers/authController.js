@@ -73,7 +73,7 @@ const handleLogin = async (req, res) => {
       });
       res
         .status(200)
-        .send({ message: "Logout success", accesToken: accesToken });
+        .send({ message: "Login success", accesToken: accesToken });
     } else {
     }
   } catch (error) {
