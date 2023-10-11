@@ -62,12 +62,75 @@ const createUser = async (req, res) => {
   }
 };
 
-const editUser = (req, res) => {
-  res.send({ message: "Edit User Endpoint" });
+const editUser = async (req, res) => {
+  const userId = req.params.id;
+
+  const {
+    company_name,
+    email,
+    phone_number,
+    address,
+    service_id,
+    status,
+    user_role,
+  } = req.body;
+
+  const t = await db.transaction({
+    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+  });
+
+  try {
+    const userData = await userModel.findByPk(userId);
+
+    if (!userData) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    userData.company_name = company_name;
+    userData.email = email;
+    userData.phone_number = phone_number;
+    userData.address = address;
+    userData.service_id = service_id;
+    userData.status = status;
+    userData.user_role = user_role;
+
+    await userData.save({ transaction: t });
+
+    await t.commit();
+
+    res
+      .status(200)
+      .send({ message: "User updated successfully", data: userData });
+  } catch (error) {
+    if (t) t.rollback();
+
+    res.status(500).send({ error: InternalErrorHandler(error) });
+  }
 };
 
-const deleteUser = (req, res) => {
-  res.send({ message: "Delete User Endpoint" });
+const deleteUser = async (req, res) => {
+  const userId = req.params.id; 
+
+  const t = await db.transaction({
+    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+  });
+
+  try {
+    const existingUser = await userModel.findByPk(userId);
+
+    if (!existingUser) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    await existingUser.destroy({ transaction: t });
+    await t.commit();
+
+    res.status(200).send({ message: "User deleted successfully" });
+  } catch (error) {
+    if (t) t.rollback();
+
+    res.status(500).send({ error: InternalErrorHandler(error) });
+  }
 };
 
 const getUserProfile = async (req, res) => {

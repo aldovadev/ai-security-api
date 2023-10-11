@@ -15,9 +15,9 @@ router.get("/user", verifyToken, verifyRoles("Admin"), getUser);
 
 router.post("/user", verifyToken, verifyRoles("Admin"), createUser);
 
-router.delete("/user", verifyToken, verifyRoles("Admin"), deleteUser);
+router.delete("/user/:id", verifyToken, verifyRoles("Admin"), deleteUser);
 
-router.patch("/user", verifyToken, verifyRoles("Admin"), editUser);
+router.patch("/user/:id", verifyToken, verifyRoles("Admin"), editUser);
 
 router.get(
   "/user/profile/:id",
