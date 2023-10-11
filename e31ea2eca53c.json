@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "minang-techno-asa",
+  "private_key_id": "e31ea2eca53c7755da3b620936cfd3fa0cb81ba7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC972p+6w5OXLxH\nYFOYmIULINpz16109Be23zTGLo1leDotluuJpjv+2ZNgR2x48UgYkUZr6/IvpBXr\ntKIQzxG6vekabTrHo095M+kHSFwWF3es60gIu5VoENjzpyYsvyxGo7/Me6vtjVgB\nP92YqEg3MwdQkrByS3SF0Xz/dHXVbBLyJBLUItZp8Mu1QVTmV1gVeFwCfRWvN0tr\ntRaQo4LZd2F8z7zH9iO4+IsD5+XXZ2bzBWODRqXW0YFvPifMqhuTkDLo+oVonRDz\nEAvhBpOP6SeKsfoabAy1ivQ196K8lqqudTaunGRmTr5HTTumSQFVSs2JHPajcbSY\nD+oMwFHnAgMBAAECggEAVJGwFN/bSFfxO0SwJB8xCfHwYqkTIiJ3FqVOzbk3mwkL\nunXa3TjHuOMuxC05JqakJ9Azj2UIul6wpfkROjPA3Kmni208QVy9S6Wp6eS1n96G\nGlfOhJjlXuc1elOf40eh0rghc85TEJwhJblGlSzErtNJO/58kv923AiZQ/MablKC\nh4YvOc8gwwlClaBYOc6g8+XPUwI602yjx5Bg1Uqp/N6N0a50yZBizVaHTXuCxurS\nCC2NKkn9IwlvhudW4SzRVxGZ04YgoMOPUSXmra1I3JYiEXiZLNJ05BQtEPXFSQok\nU5PxUUBkboS0A/UbvDgUqtR4nBryuoe/+Eg8ErrIcQKBgQDnuj5/XFC3VbNcRl2V\n9gs+BpQvam+yVR4PoMBf3njidA6bZS3F8zxnQQ1zi0XCoSgp7zvBGDVEpiOtDWqZ\n3u7bWHE4ZQjTufNaybb20BzCgPxXIf+gqyCnum0f2KFipYoNY7zKDzHYpWa+UFmq\nP2DJoPtM7nfmpteHSGMYdZCzNwKBgQDR1IO6kbzKDeR9RgaUjPiJb3HG5i37LiIQ\n8HsgGzJZRNW3DIltKkczo37GWyvBzT4KkNbCnLH+/VNjbVDWwMbmut+qNfhi8zn9\nxyZrerCD/AGUEUbeygYGTXap2pp2Z71KUKln59FZufT1DvUmWecb2vROyBn6H+jI\nbRExETcO0QKBgQC/K+xxgARrK728C6UbmY+uzRilgYbCtewF8pWiwdQy5pJCaxd3\nLnMPsCBbyXN03SVYazB93e3cQ8A8/UuLw9qEhRNq9hdxLQByTuWt+wUvBeCoNblB\noMxg87EhS8PgsTcSUs0mWaDC3bnEml9Oz9iWn0OTNU0fsVcwGWz/ecY1wwKBgDxx\nGNjfLiCNy+mCCFc2HEmKfp2qpEgcS9fRTcY7z08DkwQ9akC10vi++b+td3dF5b8p\nZZN9i5BF7IVRcd3KfgDsh40CKuBl66h8e0auerYqG1JJf76hNwcNvUbEH4ZH77C+\nd23kytsrw7HrcxZvAzF06rbe0QzJsEY7lJ4rtU5hAoGBAKx6ssa6B072bOwMM9dn\notC1f22TtM6FqZxJxVPX3OpsnR/3NUrPjoNrN7O9lDsFZ3bYUTlDVF/xHwDjqzx2\nKC5dZPFLW285Zrz/+ws1DAAUZfgoaskgNu2alhpvjEaLRHlVOASl/CpHJit55JQn\nuXaF1ZjP9B3oquGtkh36lBHA\n-----END PRIVATE KEY-----\n",
+  "client_email": "asa-storage@minang-techno-asa.iam.gserviceaccount.com",
+  "client_id": "100199609075706453924",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/asa-storage%40minang-techno-asa.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

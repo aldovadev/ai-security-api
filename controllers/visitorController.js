@@ -4,6 +4,39 @@ import db from "../config/database.js";
 import visitorModel from "../models/visitorModel.js";
 import visitorSchema from "../schemas/visitorSchema.js";
 import { InternalErrorHandler } from "../utils/errorHandler.js";
+import multer from "multer";
+import fs from "fs";
+import mkdirp from "mkdirp";
+import path from "path";
+import dotenv from "dotenv";
+import { Storage } from "@google-cloud/storage";
+
+dotenv.config();
+
+const location = [];
+const destinationPath = "resources/temp/visitor";
+
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    if (!fs.existsSync(destinationPath)) {
+      try {
+        await mkdirp(destinationPath);
+      } catch (err) {
+        return cb(err, null);
+      }
+    }
+    await cb(null, destinationPath);
+  },
+  filename: async (req, file, cb) => {
+    const idx = req.files.length - 1;
+    location[idx] = `${destinationPath}/${idx}${path.extname(
+      file.originalname
+    )}`;
+    await cb(null, `${idx}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const getVisitor = async (req, res) => {
   const visit_status = req.params.status;
@@ -38,7 +71,8 @@ const getVisitor = async (req, res) => {
 };
 
 const createVisitor = async (req, res) => {
-  const { error } = visitorSchema.validate(req.body);
+  const payload = JSON.parse(req.body.payload);
+  const { error } = visitorSchema.validate(payload);
 
   if (error) return res.status(400).send({ error: error.details[0].message });
 
@@ -53,14 +87,14 @@ const createVisitor = async (req, res) => {
     start_date,
     end_date,
     visit_reason,
-  } = req.body;
+  } = payload;
 
   const visit_number = await generateVisitNumber();
 
   const recentDate = new Date();
 
   const photo_path =
-    "/visitor/" +
+    "visitor/" +
     moment(recentDate).format("YY") +
     "/" +
     moment(recentDate).format("MM") +
@@ -93,10 +127,14 @@ const createVisitor = async (req, res) => {
       { transaction: t }
     );
 
+    const imageData = await uploadFile(photo_path);
+
     await t.commit();
-    res
-      .status(200)
-      .send({ message: "Visitor created successfully", data: newVisitor });
+    res.status(200).send({
+      message: "Visitor created successfully",
+      data: newVisitor,
+      image: imageData,
+    });
   } catch (error) {
     if (t) t.rollback();
     res.status(500).send({ error: InternalErrorHandler(error) });
@@ -134,15 +172,22 @@ const getVisitorProfile = async (req, res) => {
   }
 };
 
-export {
-  getVisitor,
-  createVisitor,
-  editVisitor,
-  deleteVisitor,
-  getVisitorProfile,
+const getUpload = (req, res, next) => {
+  const uploadedFiles = [];
+  upload.array("images", 5)(req, res, (err) => {
+    if (err) {
+      return res.status(500).json({ error: "Error uploading files" });
+    }
+
+    uploadedFiles.push(...req.files);
+
+    if (uploadedFiles.length === 5) {
+      next();
+    }
+  });
 };
 
-async function generateVisitNumber() {
+async function generateVisitNumber(visit_number) {
   const recentDate = new Date();
 
   const lastVisitNumber = await visitorModel.findOne({
@@ -157,17 +202,58 @@ async function generateVisitNumber() {
       .toString(36)
       .toUpperCase();
 
-    const firstSixDigits = lastVisitNumber.visit_number.substring(0, 6);
+    const firstSixDigits = lastVisitNumber.visit_number.substring(0, 8);
 
     if (
       incrementedSeq > "ZZ" ||
-      firstSixDigits !== moment(recentDate).format("YYMMDD")
+      firstSixDigits !== moment(recentDate).format("YYYYMMDD")
     )
       incrementedSeq = "00";
   }
 
   incrementedSeq = incrementedSeq.padStart(2, "0");
-  const result = "VST" + moment(recentDate).format("YYMMDD") + incrementedSeq;
+  const result = moment(recentDate).format("YYYYMMDD") + "VST" + incrementedSeq;
 
   return result;
 }
+
+async function uploadFile(target) {
+  const bucketName = "asa-file-storage";
+  const keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const imageUrl = process.env.IMAGE_URL;
+
+  const storage = new Storage({ keyFilename });
+
+  try {
+    const bucket = storage.bucket(bucketName);
+    const images = location;
+    const imageUploadedUrl = [];
+
+    for (const imagePath of images) {
+      const uploadedName = path.basename(imagePath);
+      const destination = `${target}/${uploadedName}`;
+
+      await bucket.upload(imagePath, {
+        destination: destination,
+        metadata: {
+          cacheControl: "public, max-age=31536000",
+        },
+      });
+
+      imageUploadedUrl.push(`${imageUrl}/${destination}`);
+    }
+
+    return imageUploadedUrl;
+  } catch (error) {
+    return error;
+  }
+}
+
+export {
+  getVisitor,
+  createVisitor,
+  editVisitor,
+  deleteVisitor,
+  getVisitorProfile,
+  getUpload,
+};

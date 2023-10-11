@@ -7,7 +7,11 @@ import bcrypt from "bcrypt";
 
 const getUser = async (req, res) => {
   try {
-    const userData = await userModel.findAll();
+    const userData = await userModel.findAll({
+      attributes: {
+        exclude: ["password"],
+      },
+    });
     res.status(200).send({ message: "Get user success", data: userData });
   } catch (error) {
     res.status(500).send({ error: InternalErrorHandler(error) });

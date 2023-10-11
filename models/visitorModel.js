@@ -15,12 +15,10 @@ const visitorModel = db.define(
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
     },
     phone_number: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
     },
     gender: {

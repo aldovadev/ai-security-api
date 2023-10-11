@@ -16,6 +16,7 @@
   "author": "aldovadev",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^7.2.0",
     "bcrypt": "^5.1.1",
     "connect-session-sequelize": "^7.1.4",
     "cookie-parser": "^1.4.6",
@@ -27,8 +28,8 @@
     "joi": "^17.10.2",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.29.4",
+    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.0.1",
-    "pg": "^8.11.3",
     "sequelize": "^6.33.0"
   }
 }

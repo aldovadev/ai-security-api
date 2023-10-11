@@ -5,6 +5,7 @@ import {
   deleteVisitor,
   editVisitor,
   getVisitorProfile,
+  getUpload,
 } from "../controllers/visitorController.js";
 import verifyToken from "../middleware/verifyToken.js";
 import verifyRoles from "../middleware/verifyRoles.js";
@@ -18,7 +19,7 @@ router.get(
   getVisitor
 );
 
-router.post("/visitor", createVisitor);
+router.post("/visitor", getUpload, createVisitor);
 
 router.patch(
   "/visitor",
