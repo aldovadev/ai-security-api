@@ -2,24 +2,28 @@ import Router from "express";
 import {
   getUser,
   createUser,
-  logoutUser,
-  loginUser,
   editUser,
   deleteUser,
+  getUserProfile,
 } from "../controllers/userController.js";
+import verifyToken from "../middleware/verifyToken.js";
+import verifyRoles from "../middleware/verifyRoles.js";
 
 const router = Router();
 
-router.get("/user", getUser);
+router.get("/user", verifyToken, verifyRoles("Admin"), getUser);
 
-router.post("/user", createUser);
+router.post("/user", verifyToken, verifyRoles("Admin"), createUser);
 
-router.delete("/user", deleteUser);
+router.delete("/user/:id", verifyToken, verifyRoles("Admin"), deleteUser);
 
-router.patch("/user", editUser);
+router.patch("/user/:id", verifyToken, verifyRoles("Admin"), editUser);
 
-router.post("/user/login", loginUser);
-
-router.post("/user/logout", logoutUser);
+router.get(
+  "/user/profile/:id",
+  verifyToken,
+  verifyRoles("Admin"),
+  getUserProfile
+);
 
 export default router;
