@@ -25,15 +25,15 @@ router.post(
   createEmployee
 );
 
-router.delete(
-  "/employee",
+router.patch(
+  "/employee/:id",
   verifyToken,
   verifyRoles("Company", "Admin"),
   editEmployee
 );
 
-router.patch(
-  "/employee",
+router.delete(
+  "/employee/:id",
   verifyToken,
   verifyRoles("Company", "Admin"),
   deleteEmployee

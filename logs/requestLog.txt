@@ -144,3 +144,4 @@
 20231012	00:13:00	47dc5347-f2d6-4b09-a44a-383da25b4763	PATCH	undefined	/user/6
 20231012	00:14:13	20bdd047-6433-4803-9948-a5b01fac8a0d	DELETE	undefined	/user/6
 20231012	00:15:04	c5daba72-4dd8-4aec-a6ef-9113a1d76863	POST	undefined	/user
+20231014	10:40:17	4c655fe8-85c7-4dc1-81b0-cc040834d5d8	POST	undefined	/login

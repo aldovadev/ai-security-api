@@ -69,12 +69,62 @@ const createEmployee = async (req, res) => {
   }
 };
 
-const editEmployee = (req, res) => {
-  res.send({ message: "Edit Employee Endpoint" });
+const editEmployee = async (req, res) => {
+  const employeeId = req.params.id; 
+  const { name, email, phone_number, gender, employee_id, position, address } = req.body; 
+
+  const { error } = employeeSchema.validate(req.body);
+  if (error) return res.status(400).send({ error: error.details[0].message });
+
+  try {
+    const existingEmployee = await employeeModel.findByPk(employeeId);
+
+    if (!existingEmployee) {
+      return res.status(404).send({ message: "Employee not found" });
+    }
+
+    await existingEmployee.update({
+      name: name,
+      email: email,
+      phone_number: phone_number,
+      gender: gender,
+      employee_id: employee_id,
+      position: position,
+      address: address,
+    });
+
+    res.status(200).send({
+      message: "Employee data updated successfully",
+      data: existingEmployee,
+    });
+  } catch (error) {
+    res.status(500).send({ error: InternalErrorHandler(error) });
+  }
 };
 
-const deleteEmployee = (req, res) => {
-  res.send({ message: "Delete Employee Endpoint" });
+const deleteEmployee = async (req, res) => {
+  const employeeId = req.params.id;
+
+  const t = await db.transaction({
+    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+  });
+
+  try {
+    const existingEmployee = await employeeModel.findByPk(employeeId);
+
+    if (!existingEmployee) {
+      return res.status(404).send({ message: "Employee not found" });
+    }
+
+    await existingEmployee.destroy({ transaction: t });
+    await t.commit();
+
+    res.status(200).send({ message: "Employee deleted successfully" });
+  } catch (error) {
+    if (t) t.rollback();
+
+    res.status(500).send({ error: InternalErrorHandler(error) });
+  }
 };
 
 const getEmployeeProfile = async (req, res) => {
