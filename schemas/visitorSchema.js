@@ -1,7 +1,6 @@
 import Joi from "joi";
 
-// Define a Joi schema that matches your Sequelize model
-const visitorSchema = Joi.object({
+const createVisitorSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   phone_number: Joi.string().required(),
@@ -14,4 +13,9 @@ const visitorSchema = Joi.object({
   visit_reason: Joi.string().required(),
 });
 
-export default visitorSchema;
+const editStatusSchema = Joi.object({
+  id: Joi.number().required(),
+  visit_status: Joi.string().required(),
+});
+
+export { createVisitorSchema, editStatusSchema };

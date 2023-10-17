@@ -47,6 +47,10 @@ const userModel = db.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "user_list",

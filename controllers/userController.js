@@ -1,8 +1,8 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
 import userModel from "../models/userModel.js";
-import userSchema from "../schemas/userSchema.js";
-import { InternalErrorHandler } from "../utils/errorHandler.js";
+import { userSchema, editUserSchema } from "../schemas/userSchema.js";
+import InternalErrorHandler from "../utils/errorHandler.js";
 import bcrypt from "bcrypt";
 
 const getUser = async (req, res) => {
@@ -21,7 +21,10 @@ const getUser = async (req, res) => {
 const createUser = async (req, res) => {
   const { error } = userSchema.validate(req.body);
 
-  if (error) return res.status(400).send({ error: error.details[0].message });
+  if (error)
+    return res
+      .status(400)
+      .send({ message: error.details[0].message, error: "bad request" });
 
   const {
     company_name,
@@ -67,6 +70,13 @@ const createUser = async (req, res) => {
 };
 
 const editUser = async (req, res) => {
+  const { error } = editUserSchema.validate(req.body);
+
+  if (error)
+    return res
+      .status(400)
+      .send({ message: error.details[0].message, error: "bad request" });
+
   const userId = req.params.id;
 
   const {

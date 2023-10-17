@@ -3,8 +3,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const verifyToken = (req, res, next) => {
+const verifyEmail = (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
+
+  if (!authHeader)
+    return res.status(403).send({
+      message: "Email verification required",
+      error: "email unverified",
+    });
 
   if (!authHeader?.startsWith("Bearer "))
     return res.status(403).send({
@@ -14,17 +20,15 @@ const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.OTP_TOKEN_SECRET, (err, decoded) => {
     if (err)
       return res.status(403).send({
-        message: "Access token needed to get this access",
-        error: "invalid token",
+        message: "Email verification required",
+        error: "email unverified",
       });
-    req.company_name = decoded.userInfo.company_name;
     req.email = decoded.userInfo.email;
-    req.user_role = decoded.userInfo.user_role;
     next();
   });
 };
 
-export default verifyToken;
+export default verifyEmail;

@@ -1,7 +1,0 @@
-runtime: nodejs18
-env_variables:
-  APP_PORT : 8080
-  DB_NAME : demoasadb
-  DB_USER : asaserver
-  DB_PASS : ukpjjpusat09
-  DB_HOST : 35.226.147.202

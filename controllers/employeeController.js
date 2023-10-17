@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 import db from "../config/database.js";
 import employeeModel from "../models/employeeModel.js";
 import employeeSchema from "../schemas/employeeSchema.js";
-import { InternalErrorHandler } from "../utils/errorHandler.js";
+import InternalErrorHandler from "../utils/errorHandler.js";
 
 const getEmployee = async (req, res) => {
   const company = req.company_name;
@@ -25,11 +25,12 @@ const getEmployee = async (req, res) => {
 
 const createEmployee = async (req, res) => {
   const { error } = employeeSchema.validate(req.body);
-  if (error) return res.status(400).send({ error: error.details[0].message });
+  if (error)
+    return res
+      .status(400)
+      .send({ message: error.details[0].message, error: "bad request" });
 
   const company = req.company_name;
-
-  console.log(company);
 
   const { name, email, phone_number, gender, employee_id, position, address } =
     req.body;

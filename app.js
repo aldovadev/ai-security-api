@@ -23,8 +23,9 @@ import authRoute from "./routes/authRoute.js";
 // import userModel from "./models/userModel.js";
 // import employeeModel from "./models/employeeModel.js";
 // import visitStatusModel from "./models/visitStatusModel.js";
+// import otpModel from "./models/otpModel.js";
 
-// Get ENV data
+// Get ENV data from .env
 dotenv.config();
 
 // Define app Express and module usage
@@ -38,7 +39,7 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
-// Sync database and check connetion
+// Sync database and check connection
 (async () => {
   // await db.sync({ alter: true });
   try {

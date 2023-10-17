@@ -8,4 +8,4 @@ const InternalErrorHandler = (error) => {
   }
 };
 
-export { InternalErrorHandler };
+export default InternalErrorHandler;

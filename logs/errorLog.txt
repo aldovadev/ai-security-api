@@ -1,0 +1,14 @@
+20231014	02:23:37	4facc5bc-b5ec-448a-8840-2f8e95c74056	TypeError: upload is not a function
+20231014	05:44:01	f1dc4823-6c3d-4a6a-8c6e-aec84afd41e4	TypeError: path must be absolute or specify root to res.sendFile
+20231014	05:45:43	9dfed164-67de-4363-85f6-360a3814c20d	TypeError: path must be absolute or specify root to res.sendFile
+20231014	05:47:25	6bccbe89-da82-4b6c-a205-41ae3c41ac44	TypeError: path must be absolute or specify root to res.sendFile
+20231014	05:48:26	ce59bb75-a00f-4c5e-8ee1-05ad48d9fd4d	TypeError: path must be absolute or specify root to res.sendFile
+20231014	05:48:36	ca485703-83ec-46a7-8f4b-c09acce6e8c7	TypeError: path must be absolute or specify root to res.sendFile
+20231014	06:13:40	70f90d14-a7ff-496c-b703-7ae75341e330	TypeError: path must be absolute or specify root to res.sendFile
+20231014	06:15:36	a1b3e152-b3f3-4f43-bea7-01cb09066b62	ReferenceError: __dirname is not defined
+20231014	06:15:40	17707669-2a54-4868-a4fa-2b41a2225a39	ReferenceError: __dirname is not defined
+20231014	06:18:29	7aaaff2a-33b8-47a6-aa3d-b36d2fa98afe	Error: ENOENT: no such file or directory, stat 'C:\Users\aldov\OneDrive\Desktop\Aldova-dev\ai-security-api\controllers\visitorController.js\resources\img\visitor\20231014VST00.png.png'
+20231014	06:18:35	45cf0247-e54a-45ef-9bd4-c3a445ae5d05	Error: ENOENT: no such file or directory, stat 'C:\Users\aldov\OneDrive\Desktop\Aldova-dev\ai-security-api\controllers\visitorController.js\resources\img\visitor\20231014VST00.png'
+20231014	06:19:29	900cab4f-f873-4844-97b8-60ab9f256f1a	ReferenceError: __dirname is not defined
+20231014	06:19:53	fafd50ff-e136-4607-a85e-8858a00a9f57	TypeError: path must be absolute or specify root to res.sendFile
+20231014	06:20:18	332fc9a2-d7d1-420f-aea3-8d01cc351abf	TypeError: path must be absolute or specify root to res.sendFile

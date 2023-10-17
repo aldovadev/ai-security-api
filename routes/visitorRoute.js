@@ -1,14 +1,19 @@
 import Router from "express";
+import { uploadVisitor } from "../utils/uploadHandler.js";
 import {
   getVisitor,
-  createVisitor,
-  deleteVisitor,
-  editVisitor,
+  createVisitorDetail,
+  editVisitorDetail,
   getVisitorProfile,
-  getUpload,
+  uploadVisitorImage,
+  changeVisitorImage,
+  setupVisitorToday,
+  changeVisitorStatus,
+  deleteVisitor,
 } from "../controllers/visitorController.js";
 import verifyToken from "../middleware/verifyToken.js";
 import verifyRoles from "../middleware/verifyRoles.js";
+import verifyEmail from "../middleware/verifyEmail.js";
 
 const router = Router();
 
@@ -19,20 +24,35 @@ router.get(
   getVisitor
 );
 
-router.post("/visitor", getUpload, createVisitor);
-
-router.patch(
-  "/visitor",
-  verifyToken,
-  verifyRoles("Admin", "Company"),
-  editVisitor
-);
-
 router.delete(
-  "/visitor",
+  "/visitor/:id",
   verifyToken,
   verifyRoles("Admin", "Company"),
   deleteVisitor
+);
+
+router.post("/visitor/detail", verifyEmail, createVisitorDetail);
+
+router.patch(
+  "/visitor/detail/:id",
+  verifyToken,
+  verifyRoles("Company"),
+  editVisitorDetail
+);
+
+router.post(
+  "/visitor/upload/:id",
+  uploadVisitor.single("image"),
+  verifyEmail,
+  uploadVisitorImage
+);
+
+router.patch(
+  "/visitor/upload/:id",
+  uploadVisitor.single("image"),
+  verifyToken,
+  verifyRoles("Company"),
+  changeVisitorImage
 );
 
 router.get(
@@ -40,6 +60,20 @@ router.get(
   verifyToken,
   verifyRoles("Admin", "Company"),
   getVisitorProfile
+);
+
+router.post(
+  "/visitor/setup",
+  verifyToken,
+  verifyRoles("Admin", "Company"),
+  setupVisitorToday
+);
+
+router.put(
+  "/visitor/status",
+  verifyToken,
+  verifyRoles("Company"),
+  changeVisitorStatus
 );
 
 export default router;
