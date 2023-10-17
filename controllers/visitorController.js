@@ -9,6 +9,7 @@ import {
 import InternalErrorHandler from "../utils/errorHandler.js";
 import { visitorTargetPath } from "../utils/uploadHandler.js";
 import fs from "fs";
+import mkdirp from "mkdirp";
 import dotenv from "dotenv";
 import { Storage } from "@google-cloud/storage";
 import axios from "axios";
@@ -462,6 +463,8 @@ async function trainImageToPythonServer(pathImageArray, endpoint) {
   const bucket = storage.bucket(bucketName);
 
   let totalImage = [];
+
+  if (!fs.existsSync(visitorTargetPath)) await mkdirp(visitorTargetPath);
 
   for (let pathImage of pathImageArray) {
     const filename = path.basename(pathImage);
