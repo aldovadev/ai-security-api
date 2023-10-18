@@ -1,5 +1,3 @@
-import { Sequelize } from "sequelize";
-import db from "../config/database.js";
 import userModel from "../models/userModel.js";
 import { userSchema, editUserSchema } from "../schemas/userSchema.js";
 import InternalErrorHandler from "../utils/errorHandler.js";
@@ -9,12 +7,19 @@ const getUser = async (req, res) => {
   try {
     const userData = await userModel.findAll({
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "refresh_token"],
       },
     });
-    res.status(200).send({ message: "Get user success", data: userData });
+    res.status(200).send({
+      message: "Successfully get user data",
+      status: "success",
+      data: userData,
+    });
   } catch (error) {
-    res.status(500).send({ error: InternalErrorHandler(error) });
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
   }
 };
 
@@ -35,37 +40,34 @@ const createUser = async (req, res) => {
     service_id,
     status,
     user_role,
+    url,
   } = req.body;
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const t = await db.transaction({
-    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
-  });
-
   try {
-    const newUser = await userModel.create(
-      {
-        company_name: company_name,
-        email: email,
-        password: hashPassword,
-        phone_number: phone_number,
-        address: address,
-        service_id: service_id,
-        status: status,
-        user_role: user_role,
-      },
-      { transaction: t }
-    );
+    const newUser = await userModel.create({
+      company_name: company_name,
+      email: email,
+      password: hashPassword,
+      phone_number: phone_number,
+      address: address,
+      service_id: service_id,
+      status: status,
+      user_role: user_role,
+      url: url,
+    });
 
-    await t.commit();
-    res
-      .status(200)
-      .send({ message: "User created successfully", data: newUser });
+    res.status(200).send({
+      message: "User created successfully",
+      status: "success",
+      data: newUser,
+    });
   } catch (error) {
-    if (t) t.rollback();
-
-    res.status(500).send({ error: InternalErrorHandler(error) });
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
   }
 };
 
@@ -87,17 +89,21 @@ const editUser = async (req, res) => {
     service_id,
     status,
     user_role,
+    url,
   } = req.body;
 
-  const t = await db.transaction({
-    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
-  });
-
   try {
-    const userData = await userModel.findByPk(userId);
+    const userData = await userModel.findByPk(userId, {
+      attributes: {
+        exclude: ["password", "refresh_token"],
+      },
+    });
 
     if (!userData) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(404).send({
+        message: `User with id ${userId} not found`,
+        error: "not found",
+      });
     }
 
     userData.company_name = company_name;
@@ -107,60 +113,69 @@ const editUser = async (req, res) => {
     userData.service_id = service_id;
     userData.status = status;
     userData.user_role = user_role;
+    userData.url = url;
 
-    await userData.save({ transaction: t });
+    await userData.save();
 
-    await t.commit();
-
-    res
-      .status(200)
-      .send({ message: "User updated successfully", data: userData });
+    res.status(200).send({
+      message: `User with id ${userId} updated successfully`,
+      status: "success",
+      data: userData,
+    });
   } catch (error) {
-    if (t) t.rollback();
-
-    res.status(500).send({ error: InternalErrorHandler(error) });
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
   }
 };
 
 const deleteUser = async (req, res) => {
   const userId = req.params.id;
 
-  const t = await db.transaction({
-    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
-  });
-
   try {
     const existingUser = await userModel.findByPk(userId);
 
     if (!existingUser) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(404).send({
+        message: `User not with id ${userId} not found`,
+        status: "not found",
+      });
     }
 
-    await existingUser.destroy({ transaction: t });
-    await t.commit();
+    await existingUser.destroy();
 
-    res.status(200).send({ message: "User deleted successfully" });
+    res.status(200).send({
+      message: `User with id ${userId} deleted successfully`,
+      status: "success",
+    });
   } catch (error) {
-    if (t) t.rollback();
-
-    res.status(500).send({ error: InternalErrorHandler(error) });
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
   }
 };
 
 const getUserProfile = async (req, res) => {
-  const id = req.params.id;
+  const userId = req.params.id;
 
   try {
     const userProfile = await userModel.findOne({
       where: {
-        id: id,
+        id: userId,
       },
     });
-    res
-      .status(200)
-      .send({ message: "Get user profile success", data: userProfile });
+    res.status(200).send({
+      message: `Get user profile with id ${userId}`,
+      status: "success",
+      data: userProfile,
+    });
   } catch (error) {
-    res.status(500).send({ error: InternalErrorHandler(error) });
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
   }
 };
 

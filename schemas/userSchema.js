@@ -9,6 +9,7 @@ const userSchema = Joi.object({
   service_id: Joi.number().integer().required(),
   status: Joi.string().required(),
   user_role: Joi.string().required(),
+  url: Joi.string().required(),
 });
 
 const editUserSchema = Joi.object({
@@ -19,6 +20,7 @@ const editUserSchema = Joi.object({
   service_id: Joi.number().integer().required(),
   status: Joi.string().required(),
   user_role: Joi.string().required(),
+  url: Joi.string().required(),
 });
 
 export { userSchema, editUserSchema };
