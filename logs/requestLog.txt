@@ -583,3 +583,5 @@
 20231018	17:16:10	1890c7d6-4824-4109-aff9-6c8328fb0b73	DELETE	undefined	/user/7
 20231018	17:16:37	fc2dc6bc-1f88-4c48-9c02-f37022e886df	POST	undefined	/user
 20231018	17:16:55	1f332f69-0b16-4645-912b-c2147e3e2f0f	GET	undefined	/user/profile/8
+20231018	20:20:52	970c695a-23c9-4002-b1d6-6ed921944891	GET	undefined	/auth/create/otp/aldova811@gmail.com
+20231018	20:21:25	20905b62-0527-4172-a756-9cf03a1f4f1a	GET	undefined	/auth/create/otp/aldova811@gmail.com

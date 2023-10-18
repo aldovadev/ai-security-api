@@ -11,7 +11,7 @@ var transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmailHandler = (req, res, mailOptions) => {
+const sendEmailHandler = (req, res, mailOptions, expired_at) => {
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       res.status(500).send({
@@ -23,6 +23,7 @@ const sendEmailHandler = (req, res, mailOptions) => {
       res.status(200).send({
         message: "OTP Email already sended",
         status: info.response,
+        expired_at: expired_at,
       });
     }
   });

@@ -3,6 +3,10 @@ import db from "../config/database.js";
 import employeeModel from "../models/employeeModel.js";
 import employeeSchema from "../schemas/employeeSchema.js";
 import InternalErrorHandler from "../utils/errorHandler.js";
+import dotenv from "dotenv";
+import userModel from "../models/userModel.js";
+
+dotenv.config();
 
 const getEmployee = async (req, res) => {
   const company = req.company_name;
@@ -13,7 +17,10 @@ const getEmployee = async (req, res) => {
         company: company,
       },
     });
-    res.status(200).send({
+
+    employeeData.url = `${process.env.IMAGE_URL}/${employeeData.url}`;
+
+    employeeData = res.status(200).send({
       message: "Get employee data success",
       company: company,
       data: employeeData,
@@ -25,48 +32,45 @@ const getEmployee = async (req, res) => {
 
 const createEmployee = async (req, res) => {
   const { error } = employeeSchema.validate(req.body);
+
   if (error)
     return res
       .status(400)
       .send({ message: error.details[0].message, error: "bad request" });
 
   const company = req.company_name;
-
   const { name, email, phone_number, gender, employee_id, position, address } =
     req.body;
 
-  const t = await db.transaction({
-    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+  const userData = await userModel.findOne({
+    where: {
+      company_name: company,
+    },
   });
 
   try {
-    const newEmployee = await employeeModel.create(
-      {
-        name: name,
-        email: email,
-        company: company,
-        phone_number: phone_number,
-        gender: gender,
-        employee_id: employee_id,
-        position: position,
-        address: address,
-        photo_path: `/employee/${employee_id}`,
-      },
-      { transaction: t }
-    );
+    const newEmployee = await employeeModel.create({
+      name: name,
+      email: email,
+      company: company,
+      phone_number: phone_number,
+      gender: gender,
+      employee_id: employee_id,
+      position: position,
+      address: address,
+      photo_path: `/${userData.id}/${employee_id}`,
+    });
 
-    await t.commit();
     res.status(200).send({
       message: "Employee created successfully",
-      company: company,
+      status: "success",
       data: newEmployee,
     });
   } catch (error) {
-    if (t) {
-      t.rollback();
-    }
-
-    res.status(500).send({ error: InternalErrorHandler(error) });
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
   }
 };
 

@@ -232,6 +232,7 @@ const handleCreateOTP = async (req, res) => {
         return res.status(500).send({
           message: "OTP still active, please check your email",
           error: "still active",
+          expired_at: expirationTime,
         });
 
       existingOtp.otp_code = otp_code;
@@ -240,7 +241,7 @@ const handleCreateOTP = async (req, res) => {
       await existingOtp.save();
     }
 
-    return sendEmailHandler(req, res, mailOptions);
+    return sendEmailHandler(req, res, mailOptions, expirationTime);
   } catch (error) {
     return res.status(500).send({
       message: "Server failed to process this request",
