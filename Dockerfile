@@ -7,7 +7,5 @@ RUN npm install
 
 COPY ./ ./
 
-EXPOSE ${APP_PORT}
-
 #RUN APP STAGE USING NODE
 CMD ["npm", "start"]

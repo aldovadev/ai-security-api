@@ -18,7 +18,7 @@ import verifyEmail from "../middleware/verifyEmail.js";
 const router = Router();
 
 router.get(
-  "/visitor/:status",
+  "/visitor",
   verifyToken,
   verifyRoles("Admin", "Company"),
   getVisitor

@@ -3,11 +3,14 @@ import {
   getService,
   getRole,
   getVisitStatus,
+  getCompany,
 } from "../controllers/optionController.js";
 import verifyToken from "../middleware/verifyToken.js";
 import verifyRoles from "../middleware/verifyRoles.js";
 
 const router = Router();
+
+router.get("/option/company", getCompany);
 
 router.get("/option/service", verifyToken, verifyRoles("Admin"), getService);
 

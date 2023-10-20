@@ -98,30 +98,37 @@ const changeVisitorImage = async (req, res) => {
 };
 
 const getVisitor = async (req, res) => {
-  const { visit_status, company } = req.body;
+  const { status, email } = req.query;
+  console.log(req.query);
+
+  const userData = await userModel.findOne({
+    where: {
+      email: email,
+    },
+  });
 
   try {
     let visitorData;
 
-    if (visit_status === "All")
+    if (status === "All")
       visitorData = await visitorModel.findAll({
         where: {
-          company_destination: company,
+          company_destination: userData.company_name,
         },
       });
     else {
       visitorData = await visitorModel.findAll({
         where: {
-          company_destination: company,
-          visit_status: visit_status,
+          company_destination: userData.company_name,
+          visit_status: status,
         },
       });
     }
 
     res.status(200).send({
-      message: `Get ${visit_status} visitor`,
+      message: `Get ${status} visitor`,
       status: "success",
-      company: company,
+      company: userData.company_name,
       data: visitorData,
     });
   } catch (error) {

@@ -1,7 +1,24 @@
 import serviceModel from "../models/serviceModel.js";
 import visitStatusModel from "../models/visitStatusModel.js";
 import roleModel from "../models/roleModel.js";
+import userModel from "..//models/userModel.js";
 import InternalErrorHandler from "../utils/errorHandler.js";
+
+const getCompany = async (req, res) => {
+  try {
+    const companyData = await userModel.findAll({
+      attributes: ["id", "company_name"],
+    });
+    res
+      .status(200)
+      .send({ message: "success get company data", data: companyData });
+  } catch (error) {
+    res.status(500).send({
+      message: "Server failed to process this request",
+      error: InternalErrorHandler(error),
+    });
+  }
+};
 
 const getService = async (req, res) => {
   try {
@@ -44,4 +61,4 @@ const getVisitStatus = async (req, res) => {
   }
 };
 
-export { getService, getVisitStatus, getRole };
+export { getCompany, getService, getVisitStatus, getRole };

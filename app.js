@@ -3,10 +3,11 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import corsOptions from "./config/corsOptions.js";
 import credentials from "./config/credentials.js";
 import db from "./config/database.js";
-import cookieParser from "cookie-parser";
+
 import { requestLogger, errorLogger } from "./utils/eventLogger.js";
 
 //Import Routes
