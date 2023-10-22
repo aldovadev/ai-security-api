@@ -5,24 +5,19 @@ const roleModel = db.define(
   "roleModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
-    },
-    role_name: {
-      type: DataTypes.STRING,
       allowNull: false,
     },
-    role_id: {
-      type: DataTypes.INTEGER,
-      unique: true,
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
-    tableName: "role_list",
+    tableName: "Role",
     timestamps: true,
-    underscored: true,
   }
 );
 

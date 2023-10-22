@@ -31,31 +31,20 @@ const createUser = async (req, res) => {
       .status(400)
       .send({ message: error.details[0].message, error: "bad request" });
 
-  const {
-    company_name,
-    email,
-    password,
-    phone_number,
-    address,
-    service_id,
-    status,
-    user_role,
-    url,
-  } = req.body;
+  const userData = req.body;
 
-  const hashPassword = await bcrypt.hash(password, 10);
+  const hashPassword = await bcrypt.hash(userData.password, 10);
 
   try {
     const newUser = await userModel.create({
-      company_name: company_name,
-      email: email,
+      companyName: userData.companyName,
+      email: userData.email,
       password: hashPassword,
-      phone_number: phone_number,
-      address: address,
-      service_id: service_id,
-      status: status,
-      user_role: user_role,
-      url: url,
+      phoneNumber: userData.phoneNumber,
+      address: userData.address,
+      serviceId: userData.serviceId,
+      status: userData.status,
+      userRole: userData.userRole,
     });
 
     res.status(200).send({
@@ -81,16 +70,7 @@ const editUser = async (req, res) => {
 
   const userId = req.params.id;
 
-  const {
-    company_name,
-    email,
-    phone_number,
-    address,
-    service_id,
-    status,
-    user_role,
-    url,
-  } = req.body;
+  const updateUserData = req.body;
 
   try {
     const userData = await userModel.findByPk(userId, {
@@ -101,24 +81,23 @@ const editUser = async (req, res) => {
 
     if (!userData) {
       return res.status(404).send({
-        message: `User with id ${userId} not found`,
+        message: `User with with this id not found`,
         error: "not found",
       });
     }
 
-    userData.company_name = company_name;
-    userData.email = email;
-    userData.phone_number = phone_number;
-    userData.address = address;
-    userData.service_id = service_id;
-    userData.status = status;
-    userData.user_role = user_role;
-    userData.url = url;
+    userData.companyName = updateUserData.companyName;
+    userData.email = updateUserData.email;
+    userData.phoneNumber = updateUserData.phoneNumber;
+    userData.address = updateUserData.address;
+    userData.serviceId = updateUserData.serviceId;
+    userData.status = updateUserData.status;
+    userData.userRole = updateUserData.userRole;
 
     await userData.save();
 
     res.status(200).send({
-      message: `User with id ${userId} updated successfully`,
+      message: `User with this id updated successfully`,
       status: "success",
       data: userData,
     });
@@ -138,7 +117,7 @@ const deleteUser = async (req, res) => {
 
     if (!existingUser) {
       return res.status(404).send({
-        message: `User not with id ${userId} not found`,
+        message: `User not with this id not found`,
         status: "not found",
       });
     }
@@ -146,7 +125,7 @@ const deleteUser = async (req, res) => {
     await existingUser.destroy();
 
     res.status(200).send({
-      message: `User with id ${userId} deleted successfully`,
+      message: `User with this id deleted successfully`,
       status: "success",
     });
   } catch (error) {
@@ -161,13 +140,10 @@ const getUserProfile = async (req, res) => {
   const userId = req.params.id;
 
   try {
-    const userProfile = await userModel.findOne({
-      where: {
-        id: userId,
-      },
-    });
+    const userProfile = await userModel.findByPk(userId);
+
     res.status(200).send({
-      message: `Get user profile with id ${userId}`,
+      message: `Get user profile with this id`,
       status: "success",
       data: userProfile,
     });

@@ -9,36 +9,40 @@ const employeeTargetPath = "resources/img/visitor";
 
 const storageVisitor = multer.diskStorage({
   destination: async (req, res, cb) => {
-    if (!fs.existsSync(visitorTargetPath)) {
+    const visitorData = await visitorModel.findByPk(req.params.id);
+    const destinationPath = `${visitorTargetPath}/${visitorData.destinationId}`;
+    if (!fs.existsSync(destinationPath)) {
       try {
-        await mkdirp(visitorTargetPath);
+        await mkdirp(destinationPath);
       } catch (err) {
         return cb(err, null);
       }
     }
-    await cb(null, visitorTargetPath);
+    await cb(null, destinationPath);
   },
   filename: async (req, file, cb) => {
     const visitorData = await visitorModel.findByPk(req.params.id);
-    const fileName = visitorData.visit_number;
+    const fileName = visitorData.visitNumber;
     await cb(null, `${fileName}.png`);
   },
 });
 
 const storageEmployee = multer.diskStorage({
   destination: async (req, res, cb) => {
-    if (!fs.existsSync(employeeTargetPath)) {
+    const employeeData = await employeeModel.findByPk(req.params.id);
+    const destinationPath = `${employeeTargetPath}/${employeeData.companyId}`;
+    if (!fs.existsSync(destinationPath)) {
       try {
-        await mkdirp(employeeTargetPath);
+        await mkdirp(destinationPath);
       } catch (err) {
         return cb(err, null);
       }
     }
-    await cb(null, employeeTargetPath);
+    await cb(null, destinationPath);
   },
   filename: async (req, file, cb) => {
     const employeeData = await employeeModel.findByPk(req.params.id);
-    const fileName = employeeData.employee_id;
+    const fileName = visitorData.employeeId;
     await cb(null, `${fileName}.png`);
   },
 });

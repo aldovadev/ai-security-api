@@ -5,34 +5,24 @@ const serviceModel = db.define(
   "serviceModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
     },
-    service_name: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    service_id: {
-      type: DataTypes.INTEGER,
-      unique: true,
-      allowNull: false,
-    },
-    duration_month: {
-      type: DataTypes.INTEGER,
-      unique: true,
-      allowNull: false,
-    },
-    max_camera: {
+    duration: {
       type: DataTypes.INTEGER,
       unique: true,
       allowNull: false,
     },
   },
   {
-    tableName: "service_list",
+    tableName: "Service",
     timestamps: true,
-    underscored: true,
   }
 );
 

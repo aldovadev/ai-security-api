@@ -5,24 +5,24 @@ const visitStatusModel = db.define(
   "visitStatusModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
     },
-    visit_status_name: {
+    statusName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    visit_status_id: {
+    statusId: {
       type: DataTypes.INTEGER,
       unique: true,
       allowNull: false,
     },
   },
   {
-    tableName: "visit_status_list",
+    tableName: "VisitStatus",
     timestamps: true,
-    underscored: true,
   }
 );
 

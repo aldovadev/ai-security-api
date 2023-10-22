@@ -11,31 +11,26 @@ import { visitorTargetPath } from "../utils/uploadHandler.js";
 import fs from "fs";
 import mkdirp from "mkdirp";
 import dotenv from "dotenv";
-import { Storage } from "@google-cloud/storage";
 import axios from "axios";
 import path from "path";
 import FormData from "form-data";
+import { v4 as uuid } from "uuid";
+import visitStatusModel from "../models/visitStatusModel.js";
+import bucket from "../utils/storageHandler.js";
 
 dotenv.config();
 
 const uploadVisitorImage = async (req, res) => {
-  const bucketName = "asa-file-storage";
-  const keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const imageUrl = process.env.IMAGE_URL;
-
   const visitorId = req.params.id;
-  const visitorData = await visitorModel.findByPk(visitorId);
-
-  const location = `${visitorTargetPath}/${visitorData.visit_number}.png`;
-
-  const storage = new Storage({ keyFilename });
-  const bucket = storage.bucket(bucketName);
-
-  const uploadedName = `${visitorData.visit_number}.png`;
-  const destination = `${visitorData.photo_path}/${uploadedName}`;
 
   try {
-    visitorData.photo_path = destination;
+    const visitorData = await visitorModel.findByPk(visitorId);
+
+    const location = `${visitorTargetPath}/${visitorData.destinationId}/${visitorData.visitNumber}.png`;
+    const destination = `${visitorData.photoPath}/${visitorData.visitNumber}.png`;
+
+    visitorData.photoPath = destination;
     await visitorData.save();
 
     await bucket.upload(location, {
@@ -44,6 +39,7 @@ const uploadVisitorImage = async (req, res) => {
         cacheControl: "public, max-age=31536000",
       },
     });
+
     await fs.unlinkSync(location);
 
     return res.status(200).send({
@@ -60,21 +56,14 @@ const uploadVisitorImage = async (req, res) => {
 };
 
 const changeVisitorImage = async (req, res) => {
-  const bucketName = "asa-file-storage";
-  const keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   const imageUrl = process.env.IMAGE_URL;
-
   const visitorId = req.params.id;
-  const visitorData = await visitorModel.findByPk(visitorId);
-
-  const location = `${visitorTargetPath}/${visitorData.visit_number}.png`;
-
-  const storage = new Storage({ keyFilename });
-  const bucket = storage.bucket(bucketName);
-
-  const destination = visitorData.photo_path;
 
   try {
+    const visitorData = await visitorModel.findByPk(visitorId);
+    const location = `${visitorTargetPath}/${visitorData.destinationId}/${visitorData.visitNumber}.png`;
+    const destination = visitorData.photoPath;
+
     await bucket.upload(location, {
       destination: destination,
       metadata: {
@@ -98,37 +87,52 @@ const changeVisitorImage = async (req, res) => {
 };
 
 const getVisitor = async (req, res) => {
-  const { status, email } = req.query;
-  console.log(req.query);
-
-  const userData = await userModel.findOne({
-    where: {
-      email: email,
-    },
-  });
+  const queryData = req.query;
 
   try {
+    const statusData = await visitStatusModel.findOne({
+      where: {
+        statusName: {
+          [Op.iLike]: queryData.status,
+        },
+      },
+    });
+
+    if (!statusData)
+      return res
+        .status(404)
+        .send({ message: "Status is not found", error: "status invalid" });
+
+    const userData = await userModel.findOne({
+      where: {
+        email: req.email,
+      },
+    });
+
+    if (!userData)
+      return res
+        .status(404)
+        .send({ message: "Email is not found", error: "email invalid" });
+
     let visitorData;
 
-    if (status === "All")
+    if (queryData.status === "all") {
       visitorData = await visitorModel.findAll({
-        where: {
-          company_destination: userData.company_name,
-        },
+        where: { destinationId: userData.id },
       });
-    else {
+    } else {
       visitorData = await visitorModel.findAll({
         where: {
-          company_destination: userData.company_name,
-          visit_status: status,
+          destinationId: userData.id,
+          statusId: statusData.statusId,
         },
       });
     }
 
     res.status(200).send({
-      message: `Get ${status} visitor`,
+      message: `Get visitor data success`,
       status: "success",
-      company: userData.company_name,
+      company: userData.companyName,
       data: visitorData,
     });
   } catch (error) {
@@ -147,67 +151,60 @@ const createVisitorDetail = async (req, res) => {
       .status(400)
       .send({ message: error.details[0].message, error: "bad request" });
 
-  const {
-    name,
-    email,
-    phone_number,
-    gender,
-    address,
-    company_origin,
-    company_destination,
-    start_date,
-    end_date,
-    visit_reason,
-  } = req.body;
+  const visitorData = req.body;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
 
-  const todayData = await visitorModel.findOne({
-    where: {
-      email: email,
-      company_destination: company_destination,
-      created_at: {
-        [Op.between]: [today, tomorrow],
+  try {
+    const todayData = await visitorModel.findOne({
+      where: {
+        email: visitorData.email,
+        destinationId: visitorData.destinationId,
+        createdAt: {
+          [Op.between]: [today, tomorrow],
+        },
       },
-    },
-  });
-
-  if (todayData)
-    return res.status(400).send({
-      message: `You already create request to visit ${company_destination} today`,
-      error: "bad request",
     });
 
-  const now = new Date();
-  const visit_number = await generateVisitNumber(now);
-  const photo_path =
-    "visitor/" +
-    moment(now).format("YY") +
-    "/" +
-    moment(now).format("MM") +
-    "/" +
-    moment(now).format("DD") +
-    "/" +
-    visit_number;
+    if (todayData)
+      return res.status(400).send({
+        message: `You already make a visit request today`,
+        error: "bad request",
+      });
 
-  try {
+    const userData = await userModel.findByPk(visitorData.destinationId);
+    const now = new Date();
+    const visitNumber = await generateVisitNumber(now);
+    const photoPath =
+      "visitor/" +
+      userData.id +
+      "/" +
+      moment(now).format("YY") +
+      "/" +
+      moment(now).format("MM") +
+      "/" +
+      moment(now).format("DD") +
+      "/" +
+      visitNumber;
+
     const newVisitor = await visitorModel.create({
-      name: name,
-      email: email,
-      phone_number: phone_number,
-      gender: gender,
-      address: address,
-      company_origin: company_origin,
-      company_destination: company_destination,
-      start_date: start_date,
-      end_date: end_date,
-      visit_reason: visit_reason,
-      visit_number: visit_number,
-      visit_status: "Incoming",
-      photo_path: photo_path,
+      id: uuid(),
+      name: visitorData.name,
+      email: visitorData.email,
+      phoneNumber: visitorData.phoneNumber,
+      gender: visitorData.gender,
+      address: visitorData.address,
+      startDate: visitorData.startDate,
+      endDate: visitorData.endDate,
+      visitReason: visitorData.visitReason,
+      visitNumber: visitNumber,
+      originId: visitorData.originId,
+      destinationId: visitorData.destinationId,
+      statusId: 1001,
+      photoPath: photoPath,
     });
 
     res.status(200).send({
@@ -224,53 +221,34 @@ const createVisitorDetail = async (req, res) => {
 };
 
 const editVisitorDetail = async (req, res) => {
-  const { error } = createVisitorSchema.validate(req.body);
-
-  if (error)
-    return res
-      .status(400)
-      .send({ message: error.details[0].message, error: "bad request" });
-
   const visitorId = req.params.id;
-
-  const {
-    name,
-    email,
-    phone_number,
-    gender,
-    address,
-    company_origin,
-    company_destination,
-    start_date,
-    end_date,
-    visit_reason,
-  } = req.body;
+  const updateVisitorData = req.body;
 
   try {
     const visitorData = await visitorModel.findByPk(visitorId);
 
     if (!visitorData) {
       return res.status(404).send({
-        message: `Visitor with id ${visitorId} found`,
+        message: `Visitor with this id found`,
         error: "not found",
       });
     }
 
-    visitorData.name = name;
-    visitorData.email = email;
-    visitorData.phone_number = phone_number;
-    visitorData.gender = gender;
-    visitorData.address = address;
-    visitorData.company_origin = company_origin;
-    visitorData.company_destination = company_destination;
-    visitorData.start_date = start_date;
-    visitorData.end_date = end_date;
-    visitorData.visit_reason = visit_reason;
+    if (updateVisitorData.destinationId) {
+      const newPhotoPath = await visitorData.photoPath.replace(
+        /\/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\//,
+        `/${updateVisitorData.destinationId}/`
+      );
+      console.log(visitorData.photoPath);
+      console.log(newPhotoPath);
+      await bucket.file(visitorData.photoPath).move(newPhotoPath);
+      updateVisitorData.photoPath = newPhotoPath;
+    }
 
-    await visitorData.save();
+    await visitorData.update(updateVisitorData);
 
     res.status(200).send({
-      message: `Visitor with id ${visitorId} has been updated`,
+      message: `Visitor with this id has been updated`,
       status: "success",
       data: visitorData,
     });
@@ -284,29 +262,26 @@ const editVisitorDetail = async (req, res) => {
 
 const deleteVisitor = async (req, res) => {
   const visitorId = req.params.id;
-
-  const visitorData = await visitorModel.findByPk(visitorId);
-
-  if (!visitorData) {
-    return res.status(404).send({
-      message: `Visitor with id ${visitorId} found`,
-      error: "not found",
-    });
-  }
-
-  const destination = visitorData.photo_path;
-
-  const bucketName = "asa-file-storage";
-  const keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  const storage = new Storage({ keyFilename });
-  const bucket = storage.bucket(bucketName);
+  const mlUrl = process.env.ML_URL;
 
   try {
+    const visitorData = await visitorModel.findByPk(visitorId);
+
+    if (!visitorData) {
+      return res.status(404).send({
+        message: `Visitor with this id found`,
+        error: "not found",
+      });
+    }
+
+    await bucket.file(visitorData.photoPath).delete();
     await visitorData.destroy();
-    await bucket.file(destination).delete();
+    await axios.delete(
+      `${mlUrl}/visitor/delete?company_id=${visitorData.destinationId}&visit_number=${visitorData.visitNumber}`
+    );
 
     res.status(200).send({
-      message: `Visitor with id ${visitorId} has been deleted`,
+      message: `Visitor with this id has been deleted`,
       status: "success",
     });
   } catch (error) {
@@ -319,6 +294,7 @@ const deleteVisitor = async (req, res) => {
 
 const getVisitorProfile = async (req, res) => {
   const visitorId = req.params.id;
+  const imageUrl = process.env.IMAGE_URL;
 
   try {
     const visitorProfile = await visitorModel.findByPk(visitorId);
@@ -326,6 +302,7 @@ const getVisitorProfile = async (req, res) => {
     res.status(200).send({
       message: "Get visitor profile success",
       data: visitorProfile,
+      url: `${imageUrl}/${visitorProfile.photoPath}`,
     });
   } catch (error) {
     res.status(500).send({
@@ -336,50 +313,38 @@ const getVisitorProfile = async (req, res) => {
 };
 
 const setupVisitorToday = async (req, res) => {
-  const email = req.email;
-
-  const userData = await userModel.findOne({
-    where: {
-      email: email,
-    },
-    attributes: {
-      exclude: ["password", "refresh_token"],
-    },
-  });
-
-  if (
-    userData.url === "null" ||
-    userData.url === null ||
-    userData.url === undefined
-  )
-    return res.status(500).send({
-      message: "Endpoint url for data training is not exist or null",
-      status: "internal server error",
+  const mlUrl = process.env.ML_URL;
+  try {
+    const userData = await userModel.findOne({
+      where: {
+        email: req.email,
+      },
     });
 
-  await axios.delete(`${userData.url}/visitor/reset`);
+    await axios.delete(`${mlUrl}/visitor/reset?company_id=${userData.id}`);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
-  const visitorData = await visitorModel.findAll({
-    where: {
-      company_destination: userData.company_name,
-      visit_status: "Accepted",
-      start_date: {
-        [Op.between]: [today, tomorrow],
+    const visitorData = await visitorModel.findAll({
+      where: {
+        destinationId: userData.id,
+        statusId: 1002,
+        startDate: {
+          [Op.between]: [today, tomorrow],
+        },
       },
-    },
-  });
+    });
 
-  try {
-    const arrayImagePath = await visitorData.map((obj) => obj.photo_path);
-    const responseTrain = await trainImageToPythonServer(
-      arrayImagePath,
-      userData.url
-    );
+    if (!visitorData)
+      return res.status(500).send({
+        message: "No data to train for today",
+        status: "internal server error",
+      });
+
+    const responseTrain = await trainImageToPythonServer(visitorData);
 
     res.status(200).send({
       message: "Success updating trained data for today",
@@ -402,16 +367,20 @@ const changeVisitorStatus = async (req, res) => {
       .status(400)
       .send({ message: error.details[0].message, error: "bad request" });
 
-  const { id, visit_status } = req.body;
+  const updateStatusData = req.body;
 
   try {
-    const visitorData = await visitorModel.findByPk(id);
-    visitorData.visit_status = visit_status;
+    const visitorData = await visitorModel.findByPk(updateStatusData.id);
+
+    if (updateStatusData.status === 1003 || updateStatusData.status === 1004) {
+    }
+
+    visitorData.statusId = updateStatusData.statusId;
 
     await visitorData.save();
 
     res.status(200).send({
-      message: `Visit status visitor with id ${id} has been updated`,
+      message: `Visit status visitor with this id has been updated`,
       status: "success",
     });
   } catch (error) {
@@ -435,19 +404,19 @@ export {
 };
 
 async function generateVisitNumber(now) {
-  const lastVisitNumber = await visitorModel.findOne({
-    order: [["created_at", "DESC"]],
+  const lastVisitor = await visitorModel.findOne({
+    order: [["createdAt", "DESC"]],
   });
 
   let incrementedSeq = "00";
 
-  if (lastVisitNumber !== null) {
-    const lastAlphanumericSeq = lastVisitNumber.visit_number.substr(-2);
+  if (lastVisitor !== null) {
+    const lastAlphanumericSeq = lastVisitor.visitNumber.substr(-2);
     incrementedSeq = (parseInt(lastAlphanumericSeq, 36) + 1)
       .toString(36)
       .toUpperCase();
 
-    const firstSixDigits = lastVisitNumber.visit_number.substring(0, 8);
+    const firstSixDigits = lastVisitor.visitNumber.substring(0, 8);
 
     if (
       incrementedSeq > "ZZ" ||
@@ -457,50 +426,54 @@ async function generateVisitNumber(now) {
   }
 
   incrementedSeq = incrementedSeq.padStart(2, "0");
-  const result = moment(visitDate).format("YYYYMMDD") + "VST" + incrementedSeq;
+  const result = moment(now).format("YYYYMMDD") + "VST" + incrementedSeq;
 
   return result;
 }
 
-async function trainImageToPythonServer(pathImageArray, endpoint) {
-  const bucketName = "asa-file-storage";
-  const keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  const storage = new Storage({ keyFilename });
+async function trainImageToPythonServer(visitorData) {
+  const totalTrain = [];
+  const mlUrl = process.env.ML_URL;
 
-  const bucket = storage.bucket(bucketName);
+  const promises = visitorData.map(async (data) => {
+    const filename = path.basename(data.photoPath);
+    if (!fs.existsSync(`${visitorTargetPath}/${data.destinationId}`))
+      await mkdirp(`${visitorTargetPath}/${data.destinationId}`);
 
-  let totalImage = [];
+    const destinationPath = `${visitorTargetPath}/${data.destinationId}/${filename}`;
 
-  if (!fs.existsSync(visitorTargetPath)) await mkdirp(visitorTargetPath);
+    return new Promise((resolve, reject) => {
+      bucket
+        .file(data.photoPath)
+        .createReadStream()
+        .pipe(fs.createWriteStream(destinationPath))
+        .on("finish", async () => {
+          const formData = new FormData();
+          formData.append("file", fs.createReadStream(destinationPath));
 
-  for (let pathImage of pathImageArray) {
-    const filename = path.basename(pathImage);
-    const visit_number = filename.split(".")[0];
-    const destinationPath = `${visitorTargetPath}/${filename}`;
+          try {
+            const r = await axios.post(
+              `${mlUrl}/visitor/add?company_id=${data.destinationId}&visit_number=${data.visitNumber}`,
+              formData,
+              {
+                headers: {
+                  ...formData.getHeaders(),
+                  accept: "application/json",
+                },
+              }
+            );
 
-    await bucket
-      .file(pathImage)
-      .createReadStream()
-      .pipe(fs.createWriteStream(destinationPath))
-      .on("finish", async () => {
-        const formData = new FormData();
-        formData.append("file", fs.createReadStream(destinationPath));
-
-        const r = await axios.post(
-          `${endpoint}/visitor/add?name=${visit_number}`,
-          formData,
-          {
-            headers: {
-              ...formData.getHeaders(),
-              accept: "application/json",
-            },
+            await fs.unlinkSync(destinationPath);
+            totalTrain.push(r.data);
+            resolve(r.data);
+          } catch (error) {
+            reject(error);
           }
-        );
+        });
+    });
+  });
 
-        await fs.unlinkSync(destinationPath);
-      });
-    totalImage.push({ visit_number: visit_number, status: "success" });
-  }
+  const results = await Promise.all(promises);
 
-  return totalImage;
+  return results;
 }

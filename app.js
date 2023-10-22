@@ -17,15 +17,6 @@ import employeeRoute from "./routes/employeeRoute.js";
 import optionRoute from "./routes/optionRoute.js";
 import authRoute from "./routes/authRoute.js";
 
-// Uncomment import table when create new table to sync
-// import roleModel from "./models/roleModel.js";
-// import serviceModel from "./models/serviceModel.js";
-// import visitorModel from "./models/visitorModel.js";
-// import userModel from "./models/userModel.js";
-// import employeeModel from "./models/employeeModel.js";
-// import visitStatusModel from "./models/visitStatusModel.js";
-// import otpModel from "./models/otpModel.js";
-
 // Get ENV data from .env
 dotenv.config();
 
@@ -33,8 +24,8 @@ dotenv.config();
 const app = express();
 app.use(requestLogger);
 app.use(credentials);
-app.use(helmet());
 app.use(cors(corsOptions));
+app.use(helmet());
 app.use(express.json());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));

@@ -15,36 +15,29 @@ const handleLogin = async (req, res) => {
 
   if (error) return res.status(400).send({ error: error.details[0].message });
 
-  const { email, password } = req.body;
+  const authData = req.body;
 
   try {
     const userData = await userModel.findOne({
       where: {
-        email: email,
+        email: authData.email,
       },
-      attributes: [
-        "company_name",
-        "email",
-        "password",
-        "user_role",
-        "refresh_token",
-      ],
     });
 
     if (!userData)
       return res
         .status(404)
-        .send({ message: `${email} not found`, error: "not found" });
+        .send({ message: `email not found`, error: "not found" });
 
-    const isMatch = await bcrypt.compare(password, userData.password);
+    const isMatch = await bcrypt.compare(authData.password, userData.password);
 
     if (isMatch) {
       const accessToken = jwt.sign(
         {
           userInfo: {
-            company_name: userData.company_name,
+            companyName: userData.companyName,
             email: userData.email,
-            user_role: userData.user_role,
+            userRole: userData.userRole,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -60,7 +53,7 @@ const handleLogin = async (req, res) => {
       );
 
       await userModel.update(
-        { refresh_token: refreshToken },
+        { refreshToken: refreshToken },
         {
           where: {
             email: userData.email,
@@ -102,7 +95,7 @@ const handleLogout = async (req, res) => {
 
   const userData = userModel.findOne({
     where: {
-      refresh_token: refreshToken,
+      refreshToken: refreshToken,
     },
   });
 
@@ -119,10 +112,10 @@ const handleLogout = async (req, res) => {
 
   try {
     await userModel.update(
-      { refresh_token: null },
+      { refreshToken: null },
       {
         where: {
-          refresh_token: refreshToken,
+          refreshToken: refreshToken,
         },
       }
     );
@@ -153,15 +146,8 @@ const handleRefreshToken = async (req, res) => {
 
   const userData = await userModel.findOne({
     where: {
-      refresh_token: refreshToken,
+      refreshToken: refreshToken,
     },
-    attributes: [
-      "company_name",
-      "email",
-      "password",
-      "user_role",
-      "refresh_token",
-    ],
   });
 
   if (!userData)
@@ -176,9 +162,9 @@ const handleRefreshToken = async (req, res) => {
     const accessToken = jwt.sign(
       {
         userInfo: {
-          company_name: userData.company_name,
+          companyName: userData.companyName,
           email: decoded.email,
-          user_role: userData.user_role,
+          userRole: userData.userRole,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
@@ -202,7 +188,7 @@ const handleCreateOTP = async (req, res) => {
       .status(400)
       .send({ message: error.details[0].message, error: "bad request" });
 
-  const otp_code = generateOTP();
+  const otpCode = generateOTP();
   const email = req.params.email;
   const now = new Date();
   const expirationTime = new Date(now.getTime() + 3 * 60000);
@@ -211,7 +197,7 @@ const handleCreateOTP = async (req, res) => {
     from: process.env.EMAIL_ADDRESS,
     to: email,
     subject: "Visitor OTP Verification",
-    html: OTPEmailTemplate(otp_code),
+    html: OTPEmailTemplate(otpCode),
   };
 
   try {
@@ -224,19 +210,19 @@ const handleCreateOTP = async (req, res) => {
     if (!existingOtp) {
       await otpModel.create({
         email: email,
-        otp_code: otp_code,
-        expired_at: expirationTime,
+        otpCode: otpCode,
+        expiredAt: expirationTime,
       });
     } else {
       if (now < existingOtp.expired_at)
         return res.status(500).send({
           message: "OTP still active, please check your email",
           error: "still active",
-          expired_at: expirationTime,
+          expiredAt: expirationTime,
         });
 
-      existingOtp.otp_code = otp_code;
-      existingOtp.expired_at = expirationTime;
+      existingOtp.otpCode = otpCode;
+      existingOtp.expiredAt = expirationTime;
 
       await existingOtp.save();
     }
@@ -255,7 +241,7 @@ const handleVerifyOTP = async (req, res) => {
     email: Joi.string()
       .regex(/^\S+@\S+\.\S+$/)
       .required(),
-    otp_code: Joi.string().required(),
+    otpCode: Joi.string().required(),
   });
 
   const { error } = verifyOtpSchema.validate(req.body);
@@ -266,13 +252,13 @@ const handleVerifyOTP = async (req, res) => {
       .send({ message: error.details[0].message, error: "bad request" });
 
   const now = new Date();
-  const { email, otp_code } = req.body;
+  const otpData = req.body;
 
   try {
     const existingOtp = await otpModel.findOne({
       where: {
-        email: email,
-        otp_code: otp_code,
+        email: otpData.email,
+        otpCode: otpData.otpCode,
       },
     });
 

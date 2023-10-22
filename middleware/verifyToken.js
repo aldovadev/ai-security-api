@@ -20,9 +20,9 @@ const verifyToken = (req, res, next) => {
         message: "Access token needed to get this access",
         error: "invalid token",
       });
-    req.company_name = decoded.userInfo.company_name;
+    req.companyName = decoded.userInfo.companyName;
     req.email = decoded.userInfo.email;
-    req.user_role = decoded.userInfo.user_role;
+    req.userRole = decoded.userInfo.userRole;
     next();
   });
 };

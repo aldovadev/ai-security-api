@@ -5,12 +5,14 @@ const userModel = db.define(
   "userModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
     },
-    company_name: {
+    companyName: {
       type: DataTypes.STRING,
+      unique: true,
       allowNull: false,
     },
     email: {
@@ -22,7 +24,7 @@ const userModel = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    phone_number: {
+    phoneNumber: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
@@ -31,11 +33,11 @@ const userModel = db.define(
       type: DataTypes.TEXT("medium"),
       allowNull: false,
     },
-    service_id: {
+    serviceId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    user_role: {
+    userRole: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -43,19 +45,14 @@ const userModel = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    refresh_token: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    url: {
+    refreshToken: {
       type: DataTypes.STRING,
       allowNull: true,
     },
   },
   {
-    tableName: "user_list",
+    tableName: "User",
     timestamps: true,
-    underscored: true,
   }
 );
 

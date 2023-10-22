@@ -5,9 +5,10 @@ const visitorModel = db.define(
   "visitorModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
@@ -17,7 +18,7 @@ const visitorModel = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    phone_number: {
+    phoneNumber: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -29,44 +30,43 @@ const visitorModel = db.define(
       type: DataTypes.TEXT("medium"),
       allowNull: false,
     },
-    company_origin: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    company_destination: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    start_date: {
+    startDate: {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    end_date: {
+    endDate: {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    visit_reason: {
+    visitReason: {
       type: DataTypes.TEXT("long"),
       allowNull: false,
     },
-    visit_number: {
+    visitNumber: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
     },
-    visit_status: {
-      type: DataTypes.STRING,
+    originId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    destinationId: {
+      type: DataTypes.UUID,
       allowNull: false,
     },
-    photo_path: {
+    statusId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    photoPath: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
   },
   {
-    tableName: "visitor_list",
+    tableName: "Visitor",
     timestamps: true,
-    underscored: true,
   }
 );
 

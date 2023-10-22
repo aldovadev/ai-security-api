@@ -5,15 +5,12 @@ const employeeModel = db.define(
   "employeeModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING,
       allowNull: false,
     },
-    company: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -22,17 +19,13 @@ const employeeModel = db.define(
       unique: true,
       allowNull: false,
     },
-    phone_number: {
+    phoneNumber: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
     },
     gender: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    employee_id: {
-      type: DataTypes.INTEGER,
       allowNull: false,
     },
     position: {
@@ -43,15 +36,22 @@ const employeeModel = db.define(
       type: DataTypes.TEXT("medium"),
       allowNull: false,
     },
-    photo_path: {
+    companyId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    employeeId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    photoPath: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
-    tableName: "employee_list",
+    tableName: "Employee",
     timestamps: true,
-    underscored: true,
   }
 );
 

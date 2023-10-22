@@ -1,6 +1,6 @@
 const verifyRoles = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req?.user_role)
+    if (!req?.userRole)
       return res.status(401).send({
         message: "Roles needed to get this access",
         error: "invalid roles",
@@ -9,9 +9,8 @@ const verifyRoles = (...allowedRoles) => {
     const rolesArray = [...allowedRoles];
 
     let result = false;
-
     for (let data of rolesArray) {
-      if (data === req.user_role) {
+      if (data === req.userRole) {
         result = true;
         break;
       }

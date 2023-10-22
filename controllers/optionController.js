@@ -7,8 +7,9 @@ import InternalErrorHandler from "../utils/errorHandler.js";
 const getCompany = async (req, res) => {
   try {
     const companyData = await userModel.findAll({
-      attributes: ["id", "company_name"],
+      attributes: ["id", "companyName"],
     });
+
     res
       .status(200)
       .send({ message: "success get company data", data: companyData });

@@ -5,27 +5,28 @@ const otpModel = db.define(
   "otpModel",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
-    otp_code: {
+    otpCode: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    expired_at: {
+    expiredAt: {
       type: DataTypes.DATE,
       allowNull: false,
     },
   },
   {
-    tableName: "otp_list",
+    tableName: "OTP",
     timestamps: true,
-    underscored: true,
   }
 );
 

@@ -26,7 +26,7 @@ const verifyEmail = (req, res, next) => {
         message: "Email verification required",
         error: "email unverified",
       });
-    req.email = decoded.userInfo.email;
+    req.email = decoded.email;
     next();
   });
 };
