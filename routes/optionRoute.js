@@ -12,14 +12,24 @@ const router = Router();
 
 router.get("/option/company", getCompany);
 
-router.get("/option/service", verifyToken, verifyRoles("Admin"), getService);
+router.get(
+  "/option/service",
+  verifyToken,
+  verifyRoles("Admin", "Company"),
+  getService
+);
 
-router.get("/option/role", verifyToken, verifyRoles("Admin"), getRole);
+router.get(
+  "/option/role",
+  verifyToken,
+  verifyRoles("Admin", "Company"),
+  getRole
+);
 
 router.get(
   "/option/visit-status",
   verifyToken,
-  verifyRoles("Admin"),
+  verifyRoles("Admin", "Company"),
   getVisitStatus
 );
 

@@ -297,3 +297,5 @@
 20231022	13:05:23	f2e67e79-22a0-4e7e-9345-00c2ec82b416	POST	undefined	/visitor/upload/23adcc74-f0c5-455d-8087-e55437f04e35
 20231022	13:05:48	3c7c1ccc-c729-45ca-90e9-859e3d5c0755	POST	undefined	/visitor/setup
 20231022	13:05:58	610c73c3-5e08-4858-937e-989bf08c1227	DELETE	undefined	/visitor/23adcc74-f0c5-455d-8087-e55437f04e35
+20231022	13:14:06	45ddc51b-750b-488d-a6d3-b80f602a354d	POST	undefined	/visitor/setup
+20231022	13:35:58	cfcac51a-2ac5-49c5-a3d0-cf30e8a0ac9e	GET	undefined	/option/visit-status
