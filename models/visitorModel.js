@@ -1,5 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../config/database.js";
+import userModel from "./userModel.js";
+import visitStatusModel from "./visitStatusModel.js";
 
 const visitorModel = db.define(
   "visitorModel",
@@ -69,5 +71,15 @@ const visitorModel = db.define(
     timestamps: true,
   }
 );
+
+visitorModel.belongsTo(userModel, {
+  foreignKey: "originId",
+  as: "origin",
+});
+
+visitorModel.belongsTo(userModel, {
+  foreignKey: "destinationId",
+  as: "destination",
+});
 
 export default visitorModel;

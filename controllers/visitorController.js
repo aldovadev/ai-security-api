@@ -119,6 +119,18 @@ const getVisitor = async (req, res) => {
     if (queryData.status === "all") {
       visitorData = await visitorModel.findAll({
         where: { destinationId: userData.id },
+        include: [
+          {
+            model: userModel,
+            as: "origin",
+            attributes: ["companyName"],
+          },
+          {
+            model: userModel,
+            as: "destination",
+            attributes: ["companyName"],
+          },
+        ],
       });
     } else {
       visitorData = await visitorModel.findAll({
@@ -126,6 +138,18 @@ const getVisitor = async (req, res) => {
           destinationId: userData.id,
           statusId: statusData.statusId,
         },
+        include: [
+          {
+            model: userModel,
+            as: "origin",
+            attributes: ["companyName"],
+          },
+          {
+            model: userModel,
+            as: "destination",
+            attributes: ["companyName"],
+          },
+        ],
       });
     }
 
@@ -302,7 +326,20 @@ const getVisitorProfile = async (req, res) => {
   const imageUrl = process.env.IMAGE_URL;
 
   try {
-    const visitorProfile = await visitorModel.findByPk(visitorId);
+    const visitorProfile = await visitorModel.findByPk(visitorId, {
+      include: [
+        {
+          model: userModel,
+          as: "origin",
+          attributes: ["companyName"],
+        },
+        {
+          model: userModel,
+          as: "destination",
+          attributes: ["companyName"],
+        },
+      ],
+    });
 
     res.status(200).send({
       message: "Get visitor profile success",
