@@ -1,6 +1,0 @@
-
-20231021	18:37:27	1d783057-d214-4b90-b929-e62b2939abfa	SyntaxError: Unexpected token } in JSON at position 332
-20231021	18:42:08	75e5088f-6faf-4764-b9b7-b940ccfd512a	SyntaxError: Unexpected token } in JSON at position 332
-20231021	18:42:23	773ed91f-03d7-4891-88c6-76fa6c0b6b46	SyntaxError: Unexpected token } in JSON at position 332
-20231022	05:39:04	ca43f74f-fea5-4c0c-8c8f-095acfd0e807	TypeError: Cannot read properties of undefined (reading 'email')
-20231022	06:16:06	642fea3e-f7c5-48b2-8be4-966656d1ab8f	Error: ENOENT: no such file or directory, open 'C:\Users\aldov\OneDrive\Desktop\Aldova-dev\ai-security-api\resources\img\visitor\35fb8bee-1a17-4361-925d-387b56424627\20231022VST00.png'

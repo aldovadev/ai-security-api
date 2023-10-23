@@ -265,18 +265,23 @@ const deleteVisitor = async (req, res) => {
   const mlUrl = process.env.ML_URL;
 
   const visitorData = await visitorModel.findByPk(visitorId);
-  await axios.delete(
-    `${mlUrl}/visitor/delete?company_id=${visitorData.destinationId}&visit_number=${visitorData.visitNumber}`
-  );
+
+  if (!visitorData) {
+    return res.status(404).send({
+      message: `Visitor with this id found`,
+      error: "not found",
+    });
+  }
+
+  const startDate = new Date(visitorData.startDate);
+  const now = new Date();
 
   try {
-    if (!visitorData) {
-      return res.status(404).send({
-        message: `Visitor with this id found`,
-        error: "not found",
-      });
+    if (startDate.getDate() === now.getDate()) {
+      await axios.delete(
+        `${mlUrl}/visitor/delete?company_id=${visitorData.destinationId}&visit_number=${visitorData.visitNumber}`
+      );
     }
-
     await bucket.file(visitorData.photoPath).delete();
     await visitorData.destroy();
 
