@@ -16,16 +16,18 @@ import visitorRoute from "./routes/visitorRoute.js";
 import employeeRoute from "./routes/employeeRoute.js";
 import optionRoute from "./routes/optionRoute.js";
 import authRoute from "./routes/authRoute.js";
+import compression from "compression";
 
 // Get ENV data from .env
 dotenv.config();
 
 // Define app Express and module usage
 const app = express();
-app.use(requestLogger);
 app.use(credentials);
 app.use(cors(corsOptions));
 app.use(helmet());
+app.use(compression());
+app.use(requestLogger);
 app.use(express.json());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
