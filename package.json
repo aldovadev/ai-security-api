@@ -6,8 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon --delay 500ms src/index.js",
-    "build": "rm -rf build && prettier --write src/"
+    "dev": "nodemon --delay 500ms src/index.js"
   },
   "keywords": [
     "express.js",
