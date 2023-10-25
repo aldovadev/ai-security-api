@@ -9,3 +9,4 @@ COPY ./ ./
 
 #RUN APP STAGE USING NODE
 CMD ["npm", "start"]
+

@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "ASA API",
   "type": "module",
-  "main": "app.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon --delay 500ms app.js"
+    "start": "node src/index.js",
+    "dev": "nodemon --delay 500ms src/index.js",
+    "build": "rm -rf build && prettier --write src/"
   },
   "keywords": [
     "express.js",
@@ -14,7 +15,7 @@
     "sequelize"
   ],
   "author": "aldovadev",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@google-cloud/storage": "^7.2.0",
     "axios": "^1.5.1",
