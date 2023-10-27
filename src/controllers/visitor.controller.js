@@ -15,6 +15,8 @@ import bucket from '../utils/storageHandler.js';
 import visitorModel from '../models/visitor.model.js';
 import userModel from '../models/user.model.js';
 import visitStatusModel from '../models/visitStatus.model.js';
+import trackingModel from '../models/tracking.model.js';
+import db from '../config/database.js';
 
 const uploadVisitorImage = async (req, res) => {
     const imageUrl = process.env.IMAGE_URL;
@@ -27,6 +29,7 @@ const uploadVisitorImage = async (req, res) => {
         const destination = `${visitorData.photoPath}/${visitorData.visitNumber}.png`;
 
         visitorData.photoPath = destination;
+        visitorData.statusId = 1001;
         await visitorData.save();
 
         await bucket.upload(location, {
@@ -214,7 +217,7 @@ const createVisitorDetail = async (req, res) => {
             visitNumber: visitNumber,
             originId: visitorData.originId,
             destinationId: visitorData.destinationId,
-            statusId: 1001,
+            statusId: 1006,
             photoPath: photoPath
         });
 
@@ -341,53 +344,6 @@ const getVisitorProfile = async (req, res) => {
     }
 };
 
-const setupVisitorToday = async (req, res) => {
-    const mlUrl = process.env.ML_URL;
-    try {
-        const userData = await userModel.findOne({
-            where: {
-                email: req.email
-            }
-        });
-
-        await axios.delete(`${mlUrl}/visitor/reset?company_id=${userData.id}`);
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-
-        const visitorData = await visitorModel.findAll({
-            where: {
-                destinationId: userData.id,
-                statusId: 1002,
-                startDate: {
-                    [Op.between]: [today, tomorrow]
-                }
-            }
-        });
-
-        if (!visitorData)
-            return res.status(500).send({
-                message: 'No data to train for today',
-                status: 'internal server error'
-            });
-
-        const responseTrain = await trainImageToPythonServer(visitorData);
-
-        res.status(200).send({
-            message: 'Success updating trained data for today',
-            status: 'success',
-            data: responseTrain
-        });
-    } catch (error) {
-        res.status(500).send({
-            message: 'Failed updating trained data for today',
-            status: 'internal server error'
-        });
-    }
-};
-
 const changeVisitorStatus = async (req, res) => {
     const { error } = editStatusSchema.validate(req.body);
 
@@ -396,26 +352,12 @@ const changeVisitorStatus = async (req, res) => {
     const updateStatusData = req.body;
     const mlUrl = process.env.ML_URL;
 
+    const t = await db.transaction();
+
     try {
-        const visitorData = await visitorModel.findByPk(updateStatusData.id, {
-            include: [
-                {
-                    model: userModel,
-                    as: 'origin',
-                    attributes: ['companyName']
-                },
-                {
-                    model: userModel,
-                    as: 'destination',
-                    attributes: ['companyName']
-                },
-                {
-                    model: visitStatusModel,
-                    as: 'status',
-                    attributes: ['statusName']
-                }
-            ]
-        });
+        const visitorData = await visitorModel.findByPk(updateStatusData.id);
+
+        if (visitorData.statusId === updateStatusData.statusId) return res.status(400).send({ message: 'This visitor data already in this status', error: 'bad request' });
 
         let trainResult;
 
@@ -430,14 +372,61 @@ const changeVisitorStatus = async (req, res) => {
             trainResult = await trainImageToPythonServer([visitorData]);
         }
 
+        const lastStatus = visitorData.statusId;
         visitorData.statusId = updateStatusData.statusId;
 
-        await visitorData.save();
+        await trackingModel.create(
+            {
+                visitorId: visitorData.id,
+                visitNumber: visitorData.visitNumber,
+                statusFrom: lastStatus,
+                statusTo: visitorData.statusId
+            },
+            {
+                transaction: t
+            }
+        );
 
+        await visitorData.save({ transaction: t });
+
+        await t.commit();
         res.status(200).send({
             message: `Visit status visitor with this id has been updated`,
             status: 'success',
             detail: trainResult?.data
+        });
+    } catch (error) {
+        await t.rollback();
+        res.status(500).send({
+            message: 'Server failed to process this request',
+            error: InternalErrorHandler(error)
+        });
+    }
+};
+
+const trackVisitor = async (req, res) => {
+    const visitorId = req.params.id;
+    const imageUrl = process.env.IMAGE_URL;
+
+    try {
+        const visitorData = await visitorModel.findByPk(visitorId);
+        const trackingData = await trackingModel.findAll({
+            where: {
+                visitorId: visitorId
+            },
+            attributes: {
+                exclude: ['id', 'createdAt']
+            }
+        });
+
+        if (!visitorData) return res.status(404).send({ message: 'Visit Id is not found', error: 'not found' });
+
+        res.status(200).send({
+            message: `Get tracking data success`,
+            status: 'success',
+            data: visitorData,
+            url: `${imageUrl}/${visitorData.photoPath}`,
+            tracking: trackingData
         });
     } catch (error) {
         res.status(500).send({
@@ -447,7 +436,7 @@ const changeVisitorStatus = async (req, res) => {
     }
 };
 
-export { getVisitor, createVisitorDetail, editVisitorDetail, deleteVisitor, getVisitorProfile, setupVisitorToday, changeVisitorImage, uploadVisitorImage, changeVisitorStatus };
+export { getVisitor, createVisitorDetail, editVisitorDetail, deleteVisitor, getVisitorProfile, changeVisitorImage, uploadVisitorImage, changeVisitorStatus, trackVisitor };
 
 const generateVisitNumber = async (now) => {
     const lastVisitor = await visitorModel.findOne({

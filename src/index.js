@@ -17,6 +17,7 @@ import visitorRoute from './routes/visitor.route.js';
 import employeeRoute from './routes/employee.route.js';
 import optionRoute from './routes/option.route.js';
 import authRoute from './routes/auth.route.js';
+import recognizeRoute from './routes/recognize.route.js';
 
 // Get ENV data from .env
 dotenv.config();
@@ -50,6 +51,7 @@ app.use('/visitor', visitorRoute);
 app.use('/employee', employeeRoute);
 app.use('/option', optionRoute);
 app.use('/auth', authRoute);
+app.use('/recognize', recognizeRoute);
 
 // Default get endpoint route
 app.get('/', async (req, res) => {

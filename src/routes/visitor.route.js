@@ -7,9 +7,9 @@ import {
     getVisitorProfile,
     uploadVisitorImage,
     changeVisitorImage,
-    setupVisitorToday,
     changeVisitorStatus,
-    deleteVisitor
+    deleteVisitor,
+    trackVisitor
 } from '../controllers/visitor.controller.js';
 import verifyToken from '../middlewares/verifyToken.js';
 import verifyRoles from '../middlewares/verifyRoles.js';
@@ -31,8 +31,8 @@ router.patch('/upload/:id', uploadVisitor.single('image'), verifyToken, verifyRo
 
 router.get('/profile/:id', verifyToken, verifyRoles('Admin', 'Company'), getVisitorProfile);
 
-router.post('/setup', verifyToken, verifyRoles('Admin', 'Company'), setupVisitorToday);
-
 router.put('/status', verifyToken, verifyRoles('Company'), changeVisitorStatus);
+
+router.get('/track/:id', verifyEmail, trackVisitor);
 
 export default router;
