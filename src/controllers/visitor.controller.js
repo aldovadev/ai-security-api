@@ -22,6 +22,8 @@ const uploadVisitorImage = async (req, res) => {
     const imageUrl = process.env.IMAGE_URL;
     const visitorId = req.params.id;
 
+    const t = await db.transaction();
+
     try {
         const visitorData = await visitorModel.findByPk(visitorId);
 
@@ -29,8 +31,20 @@ const uploadVisitorImage = async (req, res) => {
         const destination = `${visitorData.photoPath}/${visitorData.visitNumber}.png`;
 
         visitorData.photoPath = destination;
+        const lastStatus = visitorData.statusId;
         visitorData.statusId = 1001;
-        await visitorData.save();
+        await visitorData.save({ transaction: t });
+        await trackingModel.create(
+            {
+                visitorId: visitorData.id,
+                visitNumber: visitorData.visitNumber,
+                statusFrom: lastStatus,
+                statusTo: visitorData.statusId
+            },
+            {
+                transaction: t
+            }
+        );
 
         await bucket.upload(location, {
             destination: destination,
@@ -41,12 +55,15 @@ const uploadVisitorImage = async (req, res) => {
 
         await fs.unlinkSync(location);
 
+        await t.commit();
+
         return res.status(200).send({
             message: 'Success uploading visitor image',
             status: 'done',
             url: `${imageUrl}/${destination}`
         });
     } catch (error) {
+        if (t) await t.rollback();
         return res.status(500).send({
             message: 'Failed uploading visitor image',
             error: error
@@ -390,13 +407,14 @@ const changeVisitorStatus = async (req, res) => {
         await visitorData.save({ transaction: t });
 
         await t.commit();
+
         res.status(200).send({
             message: `Visit status visitor with this id has been updated`,
             status: 'success',
             detail: trainResult?.data
         });
     } catch (error) {
-        await t.rollback();
+        if (t) await t.rollback();
         res.status(500).send({
             message: 'Server failed to process this request',
             error: InternalErrorHandler(error)
@@ -411,6 +429,7 @@ const trackVisitor = async (req, res) => {
     try {
         const visitorData = await visitorModel.findByPk(visitorId);
         const trackingData = await trackingModel.findAll({
+            order: [['createdAt', 'DESC']],
             where: {
                 visitorId: visitorId
             },

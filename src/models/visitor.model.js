@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import db from '../config/database.js';
 import userModel from './user.model.js';
 import visitStatusModel from './visitStatus.model.js';
+// import trackingModel from './tracking.model.js';
 
 const visitorModel = db.define(
     'visitorModel',
@@ -86,5 +87,10 @@ visitorModel.belongsTo(visitStatusModel, {
     foreignKey: 'statusId',
     as: 'status'
 });
+
+// visitorModel.hasMany(trackingModel, {
+//     foreignKey: 'visitorId',
+//     as: 'trackings'
+// });
 
 export default visitorModel;
