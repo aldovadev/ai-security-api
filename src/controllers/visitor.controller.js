@@ -427,7 +427,25 @@ const trackVisitor = async (req, res) => {
     const imageUrl = process.env.IMAGE_URL;
 
     try {
-        const visitorData = await visitorModel.findByPk(visitorId);
+        const visitorData = await visitorModel.findByPk(visitorId, {
+            include: [
+                {
+                    model: userModel,
+                    as: 'origin',
+                    attributes: ['companyName']
+                },
+                {
+                    model: userModel,
+                    as: 'destination',
+                    attributes: ['companyName']
+                },
+                {
+                    model: visitStatusModel,
+                    as: 'status',
+                    attributes: ['statusName']
+                }
+            ]
+        });
         const trackingData = await trackingModel.findAll({
             order: [['createdAt', 'DESC']],
             where: {
