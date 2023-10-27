@@ -416,7 +416,19 @@ const trackVisitor = async (req, res) => {
             },
             attributes: {
                 exclude: ['id', 'createdAt']
-            }
+            },
+            include: [
+                {
+                    model: visitStatusModel,
+                    as: 'from',
+                    attributes: ['statusName']
+                },
+                {
+                    model: visitStatusModel,
+                    as: 'to',
+                    attributes: ['statusName']
+                }
+            ]
         });
 
         if (!visitorData) return res.status(404).send({ message: 'Visit Id is not found', error: 'not found' });

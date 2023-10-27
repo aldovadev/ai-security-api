@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import db from '../config/database.js';
 import visitorModel from './visitor.model.js';
+import visitStatusModel from './visitStatus.model.js';
 
 const trackingModel = db.define(
     'trackingModel',
@@ -33,5 +34,15 @@ const trackingModel = db.define(
         timestamps: true
     }
 );
+
+trackingModel.belongsTo(visitStatusModel, {
+    foreignKey: 'statusFrom',
+    as: 'from'
+});
+
+trackingModel.belongsTo(visitStatusModel, {
+    foreignKey: 'statusTo',
+    as: 'to'
+});
 
 export default trackingModel;
