@@ -33,6 +33,6 @@ router.get('/profile/:id', verifyToken, verifyRoles('Admin', 'Company'), getVisi
 
 router.put('/status', verifyToken, verifyRoles('Company'), changeVisitorStatus);
 
-router.get('/track/:id', verifyEmail, trackVisitor);
+router.get('/track/:id', trackVisitor);
 
 export default router;
