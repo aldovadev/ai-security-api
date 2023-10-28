@@ -1,18 +1,21 @@
 import Router from 'express';
-import { getEmployee, createEmployee, editEmployee, deleteEmployee, getEmployeeProfile } from '../controllers/employee.controller.js';
+import { getEmployee, createEmployeeDetail, editEmployeeDetail, deleteEmployee, getEmployeeProfile, uploadEmployeeImage } from '../controllers/employee.controller.js';
 import verifyToken from '../middlewares/verifyToken.js';
 import verifyRoles from '../middlewares/verifyRoles.js';
+import { uploadEmployee } from '../utils/uploadHandler.js';
 
 const router = Router();
 
-router.get('/', verifyToken, verifyRoles('Company', 'Admin'), getEmployee);
+router.post('/', verifyToken, verifyRoles('Company', 'Admin'), createEmployeeDetail);
 
-router.post('/', verifyToken, verifyRoles('Company', 'Admin'), createEmployee);
+router.patch('/:id', verifyToken, verifyRoles('Company', 'Admin'), editEmployeeDetail);
 
-router.delete('/', verifyToken, verifyRoles('Company', 'Admin'), editEmployee);
+router.post('/upload/:id', verifyToken, verifyRoles('Company', 'Admin'), uploadEmployee.single('image'), uploadEmployeeImage);
 
-router.patch('/', verifyToken, verifyRoles('Company', 'Admin'), deleteEmployee);
+// router.get('/', verifyToken, verifyRoles('Company', 'Admin'), getEmployee);
 
-router.get('/profile/:id', verifyToken, verifyRoles('Company', 'Admin'), getEmployeeProfile);
+// router.delete('/', verifyToken, verifyRoles('Company', 'Admin'), deleteEmployee);
+
+// router.get('/profile/:id', verifyToken, verifyRoles('Company', 'Admin'), getEmployeeProfile);
 
 export default router;

@@ -5,9 +5,10 @@ const employeeSchema = Joi.object({
     email: Joi.string().email().required(),
     phoneNumber: Joi.string().required(),
     gender: Joi.string().required(),
-    employeeId: Joi.string().required(),
     position: Joi.string().required(),
-    address: Joi.string().required()
+    address: Joi.string().required(),
+    companyId: Joi.string().required(),
+    employeeId: Joi.string().required()
 });
 
 export default employeeSchema;

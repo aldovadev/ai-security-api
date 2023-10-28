@@ -5,7 +5,7 @@ import visitorModel from '../models/visitor.model.js';
 import employeeModel from '../models/employee.model.js';
 
 const visitorTargetPath = 'resources/img/visitor';
-const employeeTargetPath = 'resources/img/visitor';
+const employeeTargetPath = 'resources/img/employee';
 
 const storageVisitor = multer.diskStorage({
     destination: async (req, res, cb) => {
@@ -31,6 +31,7 @@ const storageEmployee = multer.diskStorage({
     destination: async (req, res, cb) => {
         const employeeData = await employeeModel.findByPk(req.params.id);
         const destinationPath = `${employeeTargetPath}/${employeeData.companyId}`;
+
         if (!fs.existsSync(destinationPath)) {
             try {
                 await mkdirp(destinationPath);
@@ -42,7 +43,7 @@ const storageEmployee = multer.diskStorage({
     },
     filename: async (req, file, cb) => {
         const employeeData = await employeeModel.findByPk(req.params.id);
-        const fileName = visitorData.employeeId;
+        const fileName = employeeData.employeeId;
         await cb(null, `${fileName}.png`);
     }
 });
