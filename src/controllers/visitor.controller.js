@@ -506,3 +506,5 @@ const generateVisitNumber = async (now) => {
 
     return result;
 };
+
+const generateQRCode = async () => {};
