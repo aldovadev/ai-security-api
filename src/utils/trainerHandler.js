@@ -62,8 +62,8 @@ const trainImageEmployee = async (employeeData) => {
                 accept: 'application/json'
             }
         });
-        await fs.unlinkSync(location);
-        return r.data;
+
+        return r;
     } catch (error) {
         return error;
     }

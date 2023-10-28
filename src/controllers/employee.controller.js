@@ -1,11 +1,13 @@
 import employeeModel from '../models/employee.model.js';
 import employeeSchema from '../schemas/employee.schema.js';
 import InternalErrorHandler from '../utils/errorHandler.js';
-import userModel from '../models/user.model.js';
 import { v4 as uuid } from 'uuid';
 import { employeeTargetPath } from '../utils/uploadHandler.js';
 import bucket from '../utils/storageHandler.js';
 import { trainImageEmployee } from '../utils/trainerHandler.js';
+import fs from 'fs';
+import userModel from '../models/user.model.js';
+import axios from 'axios';
 
 const createEmployeeDetail = async (req, res) => {
     const { error } = employeeSchema.validate(req.body);
@@ -105,49 +107,70 @@ const uploadEmployeeImage = async (req, res) => {
 };
 
 const getEmployee = async (req, res) => {
-    const company = req.company_name;
-
     try {
+        const userData = await userModel.findByPk(req.params.id);
         const employeeData = await employeeModel.findAll({
             where: {
-                company: company
+                companyId: req.params.id
             }
         });
 
-        employeeData.url = `${process.env.IMAGE_URL}/${employeeData.url}`;
-
-        employeeData = res.status(200).send({
+        res.status(200).send({
             message: 'Get employee data success',
-            company: company,
+            company: userData.companyName,
             data: employeeData
         });
     } catch (error) {
-        res.status(500).send({ error: InternalErrorHandler(error) });
+        res.status(500).send({
+            message: 'Server failed to process this request',
+            error: InternalErrorHandler(error)
+        });
     }
 };
 
-const deleteEmployee = (req, res) => {
-    res.send({ message: 'Delete Employee Endpoint' });
+const deleteEmployee = async (req, res) => {
+    const mlUrl = process.env.ML_URL;
+
+    try {
+        const employeeData = await employeeModel.findByPk(req.params.id);
+
+        if (!employeeData)
+            return res.status(404).send({
+                message: `Employee with this id found`,
+                error: 'not found'
+            });
+
+        await axios.delete(`${mlUrl}/employee/delete?company_id=${employeeData.companyId}&employee_id=${employeeData.employeeId}`);
+        await bucket.file(employeeData.photoPath).delete();
+        await employeeData.destroy();
+
+        res.status(200).send({
+            message: `Employee with this id has been deleted`,
+            status: 'success'
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: 'Server failed to process this request',
+            error: InternalErrorHandler(error)
+        });
+    }
 };
 
 const getEmployeeProfile = async (req, res) => {
-    const id = req.params.id;
-    const company = req.company_name;
+    const imageUrl = process.env.IMAGE_URL;
 
     try {
-        const employeeProfile = await employeeModel.findOne({
-            where: {
-                id: id,
-                company: company
-            }
-        });
+        const employeeProfile = await employeeModel.findByPk(req.params.id);
         res.status(200).send({
             message: 'Get employee profile success',
-            company: company,
-            data: employeeProfile
+            data: employeeProfile,
+            url: `${imageUrl}/${employeeProfile.photoPath}`
         });
     } catch (error) {
-        res.status(500).send({ error: InternalErrorHandler(error) });
+        res.status(500).send({
+            message: 'Server failed to process this request',
+            error: InternalErrorHandler(error)
+        });
     }
 };
 

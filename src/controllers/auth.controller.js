@@ -167,12 +167,7 @@ const handleCreateOTP = async (req, res) => {
     const now = new Date();
     const expirationTime = new Date(now.getTime() + 3 * 60000);
 
-    var mailOptions = {
-        from: process.env.EMAIL_ADDRESS,
-        to: email,
-        subject: 'Visitor OTP Verification',
-        html: OTPEmailTemplate(otpCode)
-    };
+    console.log(now);
 
     try {
         const existingOtp = await otpModel.findOne({
@@ -201,7 +196,7 @@ const handleCreateOTP = async (req, res) => {
             await existingOtp.save();
         }
 
-        return sendEmailHandler(req, res, mailOptions, expirationTime);
+        return sendEmailHandler(req, res);
     } catch (error) {
         return res.status(500).send({
             message: 'Server failed to process this request',

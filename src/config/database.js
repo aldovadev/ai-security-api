@@ -6,6 +6,7 @@ const db = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.D
     dialect: 'postgres',
     host: process.env.DB_HOST,
     isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+    timezone: 'Asia/Jakarta',
     pool: {
         max: 5,
         min: 0,

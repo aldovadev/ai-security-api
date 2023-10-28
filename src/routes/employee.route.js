@@ -12,10 +12,10 @@ router.patch('/:id', verifyToken, verifyRoles('Company', 'Admin'), editEmployeeD
 
 router.post('/upload/:id', verifyToken, verifyRoles('Company', 'Admin'), uploadEmployee.single('image'), uploadEmployeeImage);
 
-// router.get('/', verifyToken, verifyRoles('Company', 'Admin'), getEmployee);
+router.get('/:id', verifyToken, verifyRoles('Company', 'Admin'), getEmployee);
 
-// router.delete('/', verifyToken, verifyRoles('Company', 'Admin'), deleteEmployee);
+router.delete('/:id', verifyToken, verifyRoles('Company', 'Admin'), deleteEmployee);
 
-// router.get('/profile/:id', verifyToken, verifyRoles('Company', 'Admin'), getEmployeeProfile);
+router.get('/profile/:id', verifyToken, verifyRoles('Company', 'Admin'), getEmployeeProfile);
 
 export default router;

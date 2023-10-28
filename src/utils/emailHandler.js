@@ -1,7 +1,5 @@
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import otpModel from '../models/otp.model.js';
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -11,7 +9,20 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-const sendEmailHandler = (req, res, mailOptions, expiredAt) => {
+const sendEmailHandler = async (req, res) => {
+    const existingOtp = await otpModel.findOne({
+        where: {
+            email: req.params.email
+        }
+    });
+
+    var mailOptions = {
+        from: process.env.EMAIL_ADDRESS,
+        to: existingOtp.email,
+        subject: 'Visitor OTP Verification',
+        html: OTPEmailTemplate(existingOtp.otpCode)
+    };
+
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             res.status(500).send({
@@ -23,7 +34,7 @@ const sendEmailHandler = (req, res, mailOptions, expiredAt) => {
             res.status(200).send({
                 message: 'OTP Email already sended',
                 status: info.response,
-                expiredAt: expiredAt
+                expiredAt: existingOtp.expiredAt
             });
         }
     });
