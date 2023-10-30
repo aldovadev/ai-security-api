@@ -46,7 +46,7 @@ const employeeModel = db.define(
         },
         photoPath: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         }
     },
     {

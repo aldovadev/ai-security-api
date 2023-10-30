@@ -26,8 +26,7 @@ const createEmployeeDetail = async (req, res) => {
             position: employeeData.position,
             address: employeeData.address,
             companyId: employeeData.companyId,
-            employeeId: employeeData.employeeId,
-            photoPath: `employee/${employeeData.companyId}/${employeeData.employeeId}.png`
+            employeeId: employeeData.employeeId
         });
 
         res.status(200).send({
@@ -77,9 +76,9 @@ const uploadEmployeeImage = async (req, res) => {
 
     try {
         const employeeData = await employeeModel.findByPk(id);
-
         const location = `${employeeTargetPath}/${employeeData.companyId}/${employeeData.employeeId}.png`;
-        const destination = employeeData.photoPath;
+        const destination = `employee/${employeeData.companyId}/${employeeData.employeeId}.png`;
+        employeeData.photoPath = destination;
 
         await bucket.upload(location, {
             destination: destination,
@@ -89,7 +88,7 @@ const uploadEmployeeImage = async (req, res) => {
         });
 
         const trainResult = await trainImageEmployee(employeeData);
-
+        await employeeData.save();
         await fs.unlinkSync(location);
 
         return res.status(200).send({
@@ -140,8 +139,10 @@ const deleteEmployee = async (req, res) => {
                 error: 'not found'
             });
 
-        await axios.delete(`${mlUrl}/employee/delete?company_id=${employeeData.companyId}&employee_id=${employeeData.employeeId}`);
-        await bucket.file(employeeData.photoPath).delete();
+        if (employeeData.photoPath) {
+            await axios.delete(`${mlUrl}/employee/delete?company_id=${employeeData.companyId}&employee_id=${employeeData.employeeId}`);
+            await bucket.file(employeeData.photoPath).delete();
+        }
         await employeeData.destroy();
 
         res.status(200).send({
