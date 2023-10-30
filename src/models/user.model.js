@@ -34,7 +34,7 @@ const userModel = db.define(
             allowNull: false
         },
         serviceId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false
         },
         userRole: {
