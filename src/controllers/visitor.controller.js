@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import moment from 'moment';
 import fs from 'fs';
 import axios from 'axios';
+import mkdirp from 'mkdirp';
 import { v4 as uuid } from 'uuid';
 
 import { createVisitorSchema, editStatusSchema } from '../schemas/visitor.schema.js';
@@ -15,6 +16,8 @@ import visitStatusModel from '../models/visitStatus.model.js';
 import trackingModel from '../models/tracking.model.js';
 import db from '../config/database.js';
 import { trainImageVisitor } from '../utils/trainerHandler.js';
+import qr from 'qrcode';
+import { sendQREmailHandler } from '../utils/emailHandler.js';
 
 const createVisitorDetail = async (req, res) => {
     const { error } = createVisitorSchema.validate(req.body);
@@ -44,14 +47,28 @@ const createVisitorDetail = async (req, res) => {
                 message: `You already make a visit request today`,
                 error: 'bad request'
             });
-
+        const newId = uuid();
         const userData = await userModel.findByPk(visitorData.destinationId);
         const now = new Date();
         const visitNumber = await generateVisitNumber(now);
         const photoPath = 'visitor/' + userData.id + '/' + moment(now).format('YY') + '/' + moment(now).format('MM') + '/' + moment(now).format('DD') + '/' + visitNumber;
+        const qrPath = 'visitor/' + userData.id + '/' + moment(now).format('YY') + '/' + moment(now).format('MM') + '/' + moment(now).format('DD') + '/' + visitNumber + '/' + newId + '.png';
+
+        const qrLocation = `${visitorTargetPath}/${visitorData.destinationId}/${newId}.png`;
+        if (!fs.existsSync(`${visitorTargetPath}/${visitorData.destinationId}`)) {
+            await mkdirp(`${visitorTargetPath}/${visitorData.destinationId}`);
+        }
+        await generateQRCode(newId, qrLocation);
+
+        await bucket.upload(qrLocation, {
+            destination: qrPath,
+            metadata: {
+                cacheControl: 'public, max-age=31536000'
+            }
+        });
 
         const newVisitor = await visitorModel.create({
-            id: uuid(),
+            id: newId,
             name: visitorData.name,
             email: visitorData.email,
             phoneNumber: visitorData.phoneNumber,
@@ -64,8 +81,11 @@ const createVisitorDetail = async (req, res) => {
             originId: visitorData.originId,
             destinationId: visitorData.destinationId,
             statusId: 1006,
-            photoPath: photoPath
+            photoPath: photoPath,
+            qrPath: qrPath
         });
+
+        await fs.unlinkSync(qrLocation);
 
         res.status(200).send({
             message: 'Visitor has been created',
@@ -89,7 +109,7 @@ const editVisitorDetail = async (req, res) => {
 
         if (!visitorData) {
             return res.status(404).send({
-                message: `Visitor with this id found`,
+                message: `Visitor with this id not found`,
                 error: 'not found'
             });
         }
@@ -151,13 +171,12 @@ const uploadVisitorImage = async (req, res) => {
                 cacheControl: 'public, max-age=31536000'
             }
         });
-
-        await fs.unlinkSync(location);
-
         await t.commit();
+        await fs.unlinkSync(location);
+        const QREmail = await sendQREmailHandler(req, res);
 
         return res.status(200).send({
-            message: 'Success uploading visitor image',
+            message: 'Success uploading visitor image, do not forget to check your email or contact us for more information.',
             status: 'done',
             url: `${imageUrl}/${destination}`
         });
@@ -294,7 +313,7 @@ const deleteVisitor = async (req, res) => {
 
     if (!visitorData) {
         return res.status(404).send({
-            message: `Visitor with this id found`,
+            message: `Visitor with this id not found`,
             error: 'not found'
         });
     }
@@ -307,6 +326,7 @@ const deleteVisitor = async (req, res) => {
             await axios.delete(`${mlUrl}/visitor/delete?company_id=${visitorData.destinationId}&visit_number=${visitorData.visitNumber}`);
         }
         await bucket.file(visitorData.photoPath).delete();
+        await bucket.file(visitorData.qrPath).delete();
         await visitorData.destroy();
 
         res.status(200).send({
@@ -345,6 +365,13 @@ const getVisitorProfile = async (req, res) => {
                 }
             ]
         });
+
+        if (!visitorProfile) {
+            return res.status(404).send({
+                message: `Visitor with this id not found`,
+                error: 'not found'
+            });
+        }
 
         res.status(200).send({
             message: 'Get visitor profile success',
@@ -466,7 +493,7 @@ const trackVisitor = async (req, res) => {
             ]
         });
 
-        if (!visitorData) return res.status(404).send({ message: 'Visit Id is not found', error: 'not found' });
+        if (!visitorData) return res.status(404).send({ message: 'Visit id is not found', error: 'not found' });
 
         res.status(200).send({
             message: `Get tracking data success`,
@@ -507,4 +534,11 @@ const generateVisitNumber = async (now) => {
     return result;
 };
 
-const generateQRCode = async () => {};
+const generateQRCode = async (data, filePath) => {
+    qr.toFile(filePath, data, (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+    });
+};

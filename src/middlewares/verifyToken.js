@@ -20,6 +20,7 @@ const verifyToken = (req, res, next) => {
                 message: 'Access token needed to get this access',
                 error: 'invalid token'
             });
+        req.id = decoded.userInfo.id;
         req.companyName = decoded.userInfo.companyName;
         req.email = decoded.userInfo.email;
         req.userRole = decoded.userInfo.userRole;

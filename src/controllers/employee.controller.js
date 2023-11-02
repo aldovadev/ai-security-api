@@ -51,7 +51,7 @@ const editEmployeeDetail = async (req, res) => {
 
         if (!employeeData)
             return res.status(404).send({
-                message: `Employee with this id found`,
+                message: `Employee with this id not found`,
                 error: 'not found'
             });
 
@@ -111,7 +111,14 @@ const getEmployee = async (req, res) => {
         const employeeData = await employeeModel.findAll({
             where: {
                 companyId: req.params.id
-            }
+            },
+            include: [
+                {
+                    model: userModel,
+                    as: 'company',
+                    attributes: ['companyName']
+                }
+            ]
         });
 
         res.status(200).send({
@@ -135,7 +142,7 @@ const deleteEmployee = async (req, res) => {
 
         if (!employeeData)
             return res.status(404).send({
-                message: `Employee with this id found`,
+                message: `Employee with this id not found`,
                 error: 'not found'
             });
 
@@ -161,7 +168,23 @@ const getEmployeeProfile = async (req, res) => {
     const imageUrl = process.env.IMAGE_URL;
 
     try {
-        const employeeProfile = await employeeModel.findByPk(req.params.id);
+        const employeeProfile = await employeeModel.findByPk(req.params.id, {
+            include: [
+                {
+                    model: userModel,
+                    as: 'company',
+                    attributes: ['companyName']
+                }
+            ]
+        });
+
+        if (!employeeProfile) {
+            return res.status(404).send({
+                message: `Employee with this id not found`,
+                error: 'not found'
+            });
+        }
+
         res.status(200).send({
             message: 'Get employee profile success',
             data: employeeProfile,

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
 
-import { sendEmailHandler, OTPEmailTemplate } from '../utils/emailHandler.js';
+import { sendOTPEmailHandler } from '../utils/emailHandler.js';
 import authSchema from '../schemas/auth.schema.js';
 import InternalErrorHandler from '../utils/errorHandler.js';
 import userModel from '../models/user.model.js';
@@ -197,7 +197,7 @@ const handleCreateOTP = async (req, res) => {
             await existingOtp.save();
         }
 
-        return sendEmailHandler(req, res);
+        return sendOTPEmailHandler(req, res);
     } catch (error) {
         return res.status(500).send({
             message: 'Server failed to process this request',

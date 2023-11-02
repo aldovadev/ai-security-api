@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import db from '../config/database.js';
+import userModel from './user.model.js';
 
 const employeeModel = db.define(
     'employeeModel',
@@ -54,5 +55,10 @@ const employeeModel = db.define(
         timestamps: true
     }
 );
+
+employeeModel.belongsTo(userModel, {
+    foreignKey: 'companyId',
+    as: 'company'
+});
 
 export default employeeModel;

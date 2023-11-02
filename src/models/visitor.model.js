@@ -65,6 +65,10 @@ const visitorModel = db.define(
         photoPath: {
             type: DataTypes.TEXT,
             allowNull: false
+        },
+        qrPath: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     },
     {
@@ -87,10 +91,5 @@ visitorModel.belongsTo(visitStatusModel, {
     foreignKey: 'statusId',
     as: 'status'
 });
-
-// visitorModel.hasMany(trackingModel, {
-//     foreignKey: 'visitorId',
-//     as: 'trackings'
-// });
 
 export default visitorModel;
