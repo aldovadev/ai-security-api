@@ -205,9 +205,6 @@ const QREmailTemplate = (visitorData) => {
                               <img src="https://storage.googleapis.com/asa-file-storage/minang-techno/MT_black.png" alt="Company Logo">
                           </div>
                           <div class="message">Congratulations on Your Registration</div>
-                                      <div class="user-image">
-                                  <img src="https://storage.googleapis.com/asa-file-storage/${visitorData.photoPath}" alt="QR Image">
-                              </div>
                           <div class="user-card">
                               <p>Hello, <strong>${visitorData.name}</strong></p>
                               <p>You have successfully registered as a visitor.</p>
